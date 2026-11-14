@@ -1,4 +1,6 @@
 """
+
+REQUIRES FROM OWNER: N1, N2 (docs/OPEN-QUESTIONS.md). Before implementing/filling run `python3 scripts/open_items.py --file reporting/report_builder.py`; if BLOCKED, ask the owner. Never invent.
 Build daily report sections.
 
 FOR THE LLM / DEVELOPER OPENING THIS FILE

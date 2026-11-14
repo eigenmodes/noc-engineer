@@ -1,4 +1,6 @@
 """
+
+REQUIRES FROM OWNER: M2 (docs/OPEN-QUESTIONS.md). Before implementing/filling run `python3 scripts/open_items.py --file noc-mcp/tools/enrichment.py`; if BLOCKED, ask the owner. Never invent.
 noc-mcp tools: enrichment.
 
 FOR THE LLM / DEVELOPER OPENING THIS FILE

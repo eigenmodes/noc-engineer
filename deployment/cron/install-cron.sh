@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# REQUIRES FROM OWNER: B4, B5, D2 (docs/OPEN-QUESTIONS.md). Before implementing/filling run `python3 scripts/open_items.py --file deployment/cron/install-cron.sh`; if BLOCKED, ask the owner. Never invent.
 # Create/refresh the NOC cron jobs in Hermes via `hermes cron create`. Idempotent: remove by name, then create.
 #
 # Usage:
