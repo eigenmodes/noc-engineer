@@ -5,7 +5,8 @@ set -eu
 : "${HERMES_HOME:?HERMES_HOME must be set}"
 SRC=/opt/noc-engineer
 mkdir -p "$HERMES_HOME"
-for p in SOUL.md config.yaml distribution.yaml skills scripts cron; do
+# Not cron/: in HERMES_HOME that is Hermes' own store (jobs.json, run output). Job specs stay in $SRC/cron.
+for p in SOUL.md config.yaml distribution.yaml skills scripts; do
   rm -rf "${HERMES_HOME:?}/$p"
   cp -r "$SRC/$p" "$HERMES_HOME/$p"
 done
@@ -31,5 +32,8 @@ for f in sorted(glob.glob("/opt/noc-engineer/cron/*.json")):
     r = subprocess.run(cmd, capture_output=True, text=True)
     print(("scheduled " if r.returncode == 0 else "FAILED ") + j["name"], r.stderr.strip()[:200])
 EOF
+
+# Settings `hermes cron create` has no flag for (attach_to_session, failure_deliver).
+python3 "$SRC/cron_settings.py" "$SRC/cron" || echo "WARN: cron settings not fully applied (see above)"
 
 exec hermes gateway run

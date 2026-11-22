@@ -2,7 +2,11 @@
   "name": "daily-summary",
   "schedule": "0 9 * * *",
   "script": "anomaly_digest.py",
-  "skills": ["daily-summary", "noc-tools"],
+  "skills": [
+    "daily-summary",
+    "noc-tools"
+  ],
   "prompt": "Follow the daily-summary skill on the digest above and write the 09:00 message for the team.",
-  "deliver": "mattermost"
+  "deliver": "mattermost",
+  "attach_to_session": true
 }

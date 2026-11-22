@@ -70,3 +70,13 @@ def test_mattermost_and_own_messages():
     assert yaml.safe_load((ROOT / "config.yaml").read_text())["group_sessions_per_user"] is False
     skill = (ROOT / "skills" / "customer-question" / "SKILL.md").read_text()
     assert "## Your own messages" in skill and "cron/output" in skill
+
+
+def test_cron_settings():
+    start = (ROOT / "deploy" / "start.sh").read_text()
+    assert "skills scripts; do" in start, "start.sh must not replace HERMES_HOME/cron (jobs.json + output)"
+    assert "cron_settings.py" in start and "cron_settings.py" in (ROOT / "deploy" / "Dockerfile").read_text()
+    for f in (ROOT / "cron").glob("*.json"):
+        j = json.loads(f.read_text())
+        assert j.get("attach_to_session", True) is True, f.name
+    assert json.loads((ROOT / "cron" / "daily-summary.json").read_text())["attach_to_session"] is True

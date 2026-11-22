@@ -49,7 +49,7 @@ distribution.yaml  SOUL.md  config.yaml   profile identity, rules and model sett
 skills/<name>/SKILL.md                    the agent's playbooks
 scripts/                                  cron scripts (deterministic)
 cron/*.json                               cron job definitions
-deploy/                                   Dockerfile, start.sh, k8s.yaml
+deploy/                                   Dockerfile, start.sh, cron_settings.py, k8s.yaml, monitoring.yaml
 tests/                                    offline tests with fake HTTP
 ```
 
@@ -66,6 +66,12 @@ noc-engineer gateway run
 ```
 
 Kubernetes: build `deploy/Dockerfile`, create the Secret `hermes-noc-env`, apply `deploy/k8s.yaml`. The pod syncs the profile and schedules the cron jobs on start.
+
+`daily-summary`, `anomaly-scan` and `grafana-alerts` have `attach_to_session: true`: their messages enter the channel conversation, so tagging the bot about them works. `hermes cron create` has no flag for it and `hermes cron list` does not show it, so `deploy/cron_settings.py` applies it on start. Check on the pod:
+
+```sh
+python3 /opt/noc-engineer/cron_settings.py --check /opt/noc-engineer/cron   # OK / DIFF / MISSING per job
+```
 
 ## To fill
 

@@ -7,5 +7,5 @@ COPY SOUL.md config.yaml distribution.yaml /opt/noc-engineer/
 COPY skills /opt/noc-engineer/skills
 COPY scripts /opt/noc-engineer/scripts
 COPY cron /opt/noc-engineer/cron
-COPY deploy/start.sh /opt/noc-engineer/start.sh
+COPY deploy/start.sh deploy/cron_settings.py /opt/noc-engineer/
 ENTRYPOINT ["/bin/sh", "/opt/noc-engineer/start.sh"]
