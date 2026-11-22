@@ -1,47 +1,89 @@
 # noc-engineer
 
-A Hermes Agent [profile distribution](https://hermes-agent.nousresearch.com/docs/user-guide/profile-distributions): the repo root is the profile.
+**An autonomous NOC engineer for your monitoring stack.** It watches Prometheus, Grafana, Elasticsearch and Jira, and tells your team *where* a problem is and *why*, with evidence, before someone has to go looking.
+
+Built as a [Hermes Agent profile distribution](https://hermes-agent.nousresearch.com/docs/user-guide/profile-distributions): the repo root *is* the agent. Read-only by design.
+
+![tests](https://img.shields.io/badge/tests-offline-brightgreen) ![mode](https://img.shields.io/badge/production%20access-read--only-orange)
+
+## What it does
 
 | Job | Trigger | Skill |
 |---|---|---|
-| Anomalies (metric now vs same time last week) -> team channel | `cron/anomaly-scan.json`, every 5 min | `anomaly-scan` |
-| Daily anomaly summary -> team channel | `cron/daily-summary.json`, 09:00 | `daily-summary` |
-| Questions from the team / customers | Slack message | `customer-question` |
-| New Grafana alerts -> where the problem is | `cron/grafana-alerts.json`, every 2 min | `grafana-alert` |
-| Customer Jira tickets -> comment with the location | `cron/jira-tickets.json`, every 5 min | `jira-ticket` |
+| Anomalies (metric now vs the same time last week) -> team channel | every 5 min | `anomaly-scan` |
+| Daily anomaly summary -> team channel | 09:00 | `daily-summary` |
+| New Grafana alerts -> where the problem is | every 2 min | `grafana-alert` |
+| Customer Jira tickets -> comment with the location | every 5 min | `jira-ticket` |
+| Questions from the team or customers | Slack message | `customer-question` |
 
-Shared skills: `noc-tools` (read-only CLI for Prometheus, ECK, Grafana, Jira; settings in `assets/noc.yaml`) and `noc-environment` (data path + how to locate a problem).
-`scripts/` are the cron scripts: deterministic, their stdout is the agent's input, empty output = `[SILENT]` (no message).
+## How it works
+
+```mermaid
+flowchart LR
+    C[cron job] --> S[Python script<br/>deterministic]
+    S -->|stdout = input<br/>empty = silent| A[Agent + skill]
+    A --> T[noc-tools<br/>read-only CLI]
+    T --> P[(Prometheus)]
+    T --> E[(Elasticsearch)]
+    T --> G[(Grafana)]
+    T --> J[(Jira)]
+    A --> O[Slack / Jira comment]
+```
+
+1. A **cron job** runs a small Python script. The script does the boring, repeatable work: polling, comparison, deduplication.
+2. If the script finds nothing, it prints nothing, the agent answers `[SILENT]`, and nobody is bothered.
+3. If it finds something, its output becomes the agent's input. The agent follows a **skill**, queries data through read-only tools, and writes a short answer: bottom line first, with the evidence it used.
+
+## Design decisions
+
+- **Deterministic first, LLM second.** Detection (is this metric outside its normal range?) is plain Python, tested offline. The LLM only explains and locates. This keeps the agent cheap, predictable and quiet.
+- **Silence is a feature.** No findings means no message. An agent that talks constantly gets muted.
+- **Read-only.** The agent never changes production. The only write is a validated, deduplicated Jira comment, and it is off unless `NOC_JIRA_ALLOW_COMMENT=true`.
+- **Evidence or nothing.** Every claim cites the tool, query and time window. If a tool is not configured or fails, the agent says exactly what it could not check instead of guessing.
+- **Untrusted input.** Alerts, logs, tickets and messages are treated as data, never as instructions.
+
+## Repository layout
 
 ```
-distribution.yaml  SOUL.md  config.yaml
-skills/<name>/SKILL.md
-scripts/           cron scripts
-cron/*.json        cron jobs
-deploy/            Dockerfile + start.sh + k8s.yaml
-tests/
+distribution.yaml  SOUL.md  config.yaml   profile identity, rules and model settings
+skills/<name>/SKILL.md                    the agent's playbooks
+scripts/                                  cron scripts (deterministic)
+cron/*.json                               cron job definitions
+deploy/                                   Dockerfile, start.sh, k8s.yaml
+tests/                                    offline tests with fake HTTP
 ```
 
 ## Install
+
 ```bash
 hermes profile install github.com/eigenmodes/noc-engineer --alias
-# fill ~/.hermes/profiles/noc-engineer/.env with the vars it lists, then schedule cron (same as cron/*.json):
+# fill ~/.hermes/profiles/noc-engineer/.env with the variables it lists, then schedule the cron jobs:
 noc-engineer cron create "*/5 * * * *" "Follow the anomaly-scan skill on the script output above. If it is empty, answer exactly [SILENT]." --name anomaly-scan --script anomaly_scan.py --skill anomaly-scan --skill noc-tools --skill noc-environment --deliver slack
 noc-engineer cron create "0 9 * * *" "Follow the daily-summary skill on the digest above and write the 09:00 message for the team." --name daily-summary --script anomaly_digest.py --skill daily-summary --skill noc-tools --deliver slack
 noc-engineer cron create "*/2 * * * *" "Follow the grafana-alert skill on the new alerts above. If there are none, answer exactly [SILENT]." --name grafana-alerts --script grafana_poll.py --skill grafana-alert --skill noc-tools --skill noc-environment --deliver slack
 noc-engineer cron create "*/5 * * * *" "Follow the jira-ticket skill on the tickets above. If there are none, answer exactly [SILENT]." --name jira-tickets --script jira_poll.py --skill jira-ticket --skill noc-tools --skill noc-environment --deliver slack
 noc-engineer gateway run
 ```
-Kubernetes: build `deploy/Dockerfile`, create Secret `hermes-noc-env`, apply `deploy/k8s.yaml`. The pod syncs the profile and schedules the cron jobs on start.
+
+Kubernetes: build `deploy/Dockerfile`, create the Secret `hermes-noc-env`, apply `deploy/k8s.yaml`. The pod syncs the profile and schedules the cron jobs on start.
 
 ## To fill
-- `config.yaml`: Kimi K3 endpoint and model id
-- `skills/noc-tools/assets/noc.yaml`: anomaly PromQL per check, ECK index, customer JQL, pipeline hop ids
-- `skills/noc-environment/SKILL.md`: hops, metric per hop, known failure patterns
+
+Environment-specific values are deliberately left as `TBD`, never invented:
+
+- `config.yaml`: model endpoint and model id
+- `skills/noc-tools/assets/noc.yaml`: anomaly PromQL per check, Elasticsearch index, customer JQL, pipeline hop ids
+- `skills/noc-environment/SKILL.md`: data path, metric per hop, known failure patterns
 - `deploy/k8s.yaml`: image and namespace
 
 ## Safety
-Read-only. The only write is a validated, deduplicated Jira comment, off unless `NOC_JIRA_ALLOW_COMMENT=true`.
-The agent has a shell, so give it read-only tokens and a Jira user that can only comment.
 
-Tests: `python3 -m pytest -q tests`
+Give the agent **read-only tokens** and a Jira user that can only comment. The agent has a shell, so scope its credentials to the minimum.
+
+## Tests
+
+```bash
+python3 -m pytest -q tests
+```
+
+The tests run offline against fake HTTP, so no monitoring stack is needed.
