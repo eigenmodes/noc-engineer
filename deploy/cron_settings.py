@@ -8,6 +8,9 @@ cron.jobs.update_job (same lock as the CLI).
 
   cron_settings.py [CRON_DIR]           apply, then print each job's live values
   cron_settings.py --check [CRON_DIR]   only print; exit 1 if a live job differs from cron/*.json
+
+No JSON specs (jobs built by a bash script with `hermes cron create`)? Name the jobs instead:
+  cron_settings.py [--check] --attach daily-summary anomaly-scan grafana-alerts
 """
 import glob
 import json
@@ -53,10 +56,16 @@ def wanted(cron_dir):
 def main(argv):
     check = "--check" in argv
     args = [a for a in argv if a != "--check"]
-    cron_dir = args[0] if args else os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "cron")
+    if args and args[0] == "--attach":
+        if len(args) < 2:
+            sys.exit("cron_settings: --attach needs at least one job name")
+        specs = [(name, {"attach_to_session": True}) for name in args[1:]]
+    else:
+        cron_dir = args[0] if args else os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "cron")
+        specs = list(wanted(cron_dir))
     live = {j.get("name"): j for j in J.list_jobs(include_disabled=True)}
     bad = 0
-    for name, want in wanted(cron_dir):
+    for name, want in specs:
         job = live.get(name)
         if job is None:
             print(f"MISSING  {name}: not scheduled")
