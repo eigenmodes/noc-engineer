@@ -1,6 +1,8 @@
 # docker build -f deploy/Dockerfile --build-arg HERMES_IMAGE=<hermes image> -t <registry>/noc-engineer .
 ARG HERMES_IMAGE
 FROM ${HERMES_IMAGE}
+# OTLP export and Langfuse SDK baked in: the pod may not reach PyPI to lazy-install them.
+RUN pip install --no-cache-dir "opentelemetry-sdk" "opentelemetry-exporter-otlp-proto-http" "langfuse"
 COPY SOUL.md config.yaml distribution.yaml /opt/noc-engineer/
 COPY skills /opt/noc-engineer/skills
 COPY scripts /opt/noc-engineer/scripts

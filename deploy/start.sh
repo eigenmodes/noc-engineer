@@ -1,15 +1,20 @@
 #!/bin/sh
 # Pod entrypoint. Same as `hermes profile update`: replace the distribution-owned files in HERMES_HOME
-# (config.yaml only on first start), schedule any cron job from cron/*.json that is not there yet, run the gateway.
+# (config.yaml included: the repo is the source of truth), schedule any cron job from cron/*.json that is not there yet, run the gateway.
 set -eu
 : "${HERMES_HOME:?HERMES_HOME must be set}"
 SRC=/opt/noc-engineer
 mkdir -p "$HERMES_HOME"
-for p in SOUL.md distribution.yaml skills scripts cron; do
+for p in SOUL.md config.yaml distribution.yaml skills scripts cron; do
   rm -rf "${HERMES_HOME:?}/$p"
   cp -r "$SRC/$p" "$HERMES_HOME/$p"
 done
-[ -f "$HERMES_HOME/config.yaml" ] || cp "$SRC/config.yaml" "$HERMES_HOME/config.yaml"
+
+# Langfuse tracing only when its keys are in the Secret. Catalog plugin on new Hermes, bundled one on older.
+if [ -n "${HERMES_LANGFUSE_PUBLIC_KEY:-}" ]; then
+  hermes plugins enable langfuse 2>/dev/null || hermes plugins install langfuse --enable 2>/dev/null \
+    || hermes plugins enable observability/langfuse || echo "WARN: Langfuse plugin not enabled"
+fi
 
 python3 - <<'EOF'
 import glob, json, subprocess

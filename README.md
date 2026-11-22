@@ -69,12 +69,24 @@ Kubernetes: build `deploy/Dockerfile`, create the Secret `hermes-noc-env`, apply
 
 ## To fill
 
+- OTel Collector endpoint in `config.yaml` (`monitoring.export.otlp.endpoint`); Langfuse keys in the Secret if you want traces
+
 Environment-specific values are deliberately left as `TBD`, never invented:
 
 - `config.yaml`: model endpoint and model id
 - `skills/noc-tools/assets/noc.yaml`: anomaly PromQL per check, Elasticsearch index, customer JQL, pipeline hop ids
 - `skills/noc-environment/SKILL.md`: data path, metric per hop, known failure patterns
 - `deploy/k8s.yaml`: image and namespace
+
+## Monitoring
+
+| Layer | What | Where |
+|---|---|---|
+| Is it alive | gateway up, chat connected, cron heartbeat, overdue jobs, one span per cron run | `config.yaml` `monitoring:` -> OTel Collector -> Prometheus -> Grafana |
+| Alerts on the agent | down, chat disconnected, cron stalled/overdue, no successful run in 30 min | `deploy/monitoring.yaml` (PrometheusRule) |
+| Why it answered that | every turn: model calls, tool calls, tokens, latency | Langfuse, on only when `HERMES_LANGFUSE_*` keys are in the Secret; capture `sanitized` |
+
+Check on the pod: `hermes monitoring status`.
 
 ## Safety
 

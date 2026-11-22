@@ -2,3 +2,14 @@ model:
   provider: custom
   default: kimi-k3                              # TBD: exact model id served by the endpoint
   base_url: "https://REPLACE-kimi-endpoint/v1"  # TBD
+
+# Health of the agent itself -> OTLP collector -> Prometheus/Grafana (alerts in deploy/monitoring.yaml).
+# Exports gateway/platform up, cron scheduler heartbeat, overdue jobs, and one span per cron run.
+monitoring:
+  gateway_health_export:
+    enabled: true
+  export:
+    otlp:
+      enabled: true
+      endpoint: "http://REPLACE-otel-collector:4318/v1/traces"   # TBD: OTel Collector (metrics/logs paths derive from it)
+      headers_env: {}                                            # header name -> ENV VAR NAME, if the collector needs auth

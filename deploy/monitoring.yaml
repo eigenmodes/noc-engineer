@@ -1,0 +1,34 @@
+# Alerts on the agent itself. Hermes exports OTLP (config.yaml: monitoring) -> OTel Collector -> Prometheus.
+# The in-agent jobs cannot report a dead gateway, so these live outside Hermes.
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata: {name: hermes-noc}
+spec:
+  groups:
+    - name: hermes-noc
+      rules:
+        - alert: HermesNocDown
+          expr: absent(hermes_gateway_up) or max(hermes_gateway_up) == 0
+          for: 5m
+          labels: {severity: critical}
+          annotations: {summary: "NOC agent gateway down or not exporting"}
+        - alert: HermesNocChatDisconnected
+          expr: min by (platform) (hermes_platform_up) == 0
+          for: 5m
+          labels: {severity: critical}
+          annotations: {summary: "NOC agent lost {{ $labels.platform }}: team messages are not received"}
+        - alert: HermesNocCronStalled
+          expr: max(hermes_cron_scheduler_heartbeat_age_seconds) > 600
+          for: 5m
+          labels: {severity: critical}
+          annotations: {summary: "Cron scheduler stalled: no anomaly scan, alert or ticket handling"}
+        - alert: HermesNocCronOverdue
+          expr: max(hermes_cron_jobs_overdue) > 0
+          for: 15m
+          labels: {severity: warning}
+          annotations: {summary: "{{ $value }} NOC cron jobs overdue"}
+        - alert: HermesNocCronNoSuccess
+          expr: max(hermes_cron_scheduler_last_success_age_seconds) > 1800
+          for: 10m
+          labels: {severity: warning}
+          annotations: {summary: "No successful cron run in 30 min (model endpoint or backends failing)"}

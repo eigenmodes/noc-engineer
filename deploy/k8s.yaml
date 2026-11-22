@@ -23,6 +23,7 @@ spec:
           env:
             - {name: HERMES_HOME, value: /data/hermes}
             - {name: TZ, value: Asia/Jerusalem}             # cron schedules are local time
+            - {name: HERMES_LANGFUSE_CAPTURE, value: sanitized} # customer data: no raw prompts/results in Langfuse
           envFrom: [{secretRef: {name: hermes-noc-env}}]
           resources:
             requests: {cpu: 250m, memory: 1Gi}

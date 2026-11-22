@@ -19,4 +19,7 @@ env_requires:
   - {name: JIRA_USER, description: "Jira user (comment-only permission)", required: false}
   - {name: JIRA_TOKEN, description: "Jira API token / PAT", required: false}
   - {name: NOC_JIRA_ALLOW_COMMENT, description: "true lets the agent comment on customer tickets", required: false, default: "false"}
+  - {name: HERMES_LANGFUSE_PUBLIC_KEY, description: "Langfuse project public key (pk-lf-...). Empty = tracing off", required: false}
+  - {name: HERMES_LANGFUSE_SECRET_KEY, description: "Langfuse project secret key (sk-lf-...)", required: false}
+  - {name: HERMES_LANGFUSE_BASE_URL, description: "Self-hosted Langfuse URL", required: false}
 distribution_owned: [SOUL.md, config.yaml, skills/, scripts/, cron/, distribution.yaml]

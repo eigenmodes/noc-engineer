@@ -50,6 +50,15 @@ def test_config_files_parse():
     assert len(list(yaml.safe_load_all((ROOT / "deploy" / "k8s.yaml").read_text()))) == 2
 
 
+def test_monitoring():
+    cfg = yaml.safe_load((ROOT / "config.yaml").read_text())["monitoring"]
+    assert cfg["gateway_health_export"]["enabled"] and cfg["export"]["otlp"]["enabled"]
+    rules = yaml.safe_load((ROOT / "deploy" / "monitoring.yaml").read_text())["spec"]["groups"][0]["rules"]
+    assert {r["alert"] for r in rules} >= {"HermesNocDown", "HermesNocChatDisconnected", "HermesNocCronStalled"}
+    start = (ROOT / "deploy" / "start.sh").read_text()
+    assert "config.yaml distribution.yaml" in start and "HERMES_LANGFUSE_PUBLIC_KEY" in start
+
+
 def test_prompt_files_have_no_dev_notes():
     for f in [ROOT / "SOUL.md", *(ROOT / "skills").glob("*/SKILL.md")]:
         assert "TODO" not in f.read_text() and "mcp" not in f.read_text().lower(), f
