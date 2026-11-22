@@ -105,8 +105,9 @@ Without a backup endpoint the two `agent` defaults already apply; change nothing
 #!/usr/bin/env python3
 """Apply the per-job cron settings that `hermes cron create` has no flag for, and verify them.
 
-Hermes v0.22.5 keeps `attach_to_session` and `failure_deliver` on the job but exposes them only
-through the agent's cronjob tool, and `hermes cron list` does not show them. This reads the wanted
+Hermes v0.22.5 (and v0.23.3) keeps `attach_to_session` on the job but has no CLI flag for it (only the
+agent's cronjob tool), and `hermes cron list` does not show it. `failure_deliver` also has a CLI flag
+(`--failure-deliver`); it is handled here too so cron/*.json can carry it. This reads the wanted
 values from cron/*.json, matches live jobs by name, and writes through Hermes' own
 cron.jobs.update_job (same lock as the CLI).
 
