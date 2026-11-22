@@ -50,7 +50,7 @@ skills/<name>/SKILL.md                    the agent's playbooks
 scripts/                                  cron scripts (deterministic)
 cron/*.json                               cron job definitions
 deploy/                                   Dockerfile, start.sh, cron_settings.py, e2e_check.py, k8s.yaml, monitoring.yaml
-code-review/                              for coding agents: HERMES-STRUCTURE, HEALTH-CHECKLIST, HERMES-UPDATE-PROMPT, WAKE-AGENT, MIGRATION-v0.22.5-to-v0.23.3, E2E-CHECKS,
+code-review/                              for coding agents (start with START-HERE.md): HERMES-STRUCTURE, HEALTH-CHECKLIST, HERMES-UPDATE-PROMPT, WAKE-AGENT, MIGRATION-v0.22.5-to-v0.23.3, E2E-CHECKS,
                                           HERMES-REFERENCE-v0.22.5 (official docs), hermes-agent/ (v0.22.5 source, submodule)
 tests/                                    offline tests with fake HTTP
 ```
