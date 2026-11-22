@@ -62,3 +62,11 @@ def test_monitoring():
 def test_prompt_files_have_no_dev_notes():
     for f in [ROOT / "SOUL.md", *(ROOT / "skills").glob("*/SKILL.md")]:
         assert "TODO" not in f.read_text() and "mcp" not in f.read_text().lower(), f
+
+
+def test_mattermost_and_own_messages():
+    for f in (ROOT / "cron").glob("*.json"):
+        assert json.loads(f.read_text())["deliver"] == "mattermost", f.name
+    assert yaml.safe_load((ROOT / "config.yaml").read_text())["group_sessions_per_user"] is False
+    skill = (ROOT / "skills" / "customer-question" / "SKILL.md").read_text()
+    assert "## Your own messages" in skill and "cron/output" in skill

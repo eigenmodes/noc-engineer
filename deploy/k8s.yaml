@@ -1,4 +1,4 @@
-# One pod: Hermes gateway (Slack + cron). Secret hermes-noc-env (outside git) holds the env vars listed in distribution.yaml.
+# One pod: Hermes gateway (Mattermost + cron). Secret hermes-noc-env (outside git) holds the env vars listed in distribution.yaml.
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata: {name: hermes-noc-home}
@@ -10,7 +10,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata: {name: hermes-noc}
 spec:
-  replicas: 1                     # exactly one: cron must not run twice; Slack Socket Mode = one connection
+  replicas: 1                     # exactly one: cron must not run twice; one chat connection
   strategy: {type: Recreate}
   selector: {matchLabels: {app: hermes-noc}}
   template:

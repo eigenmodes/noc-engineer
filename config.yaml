@@ -3,6 +3,10 @@ model:
   default: kimi-k3                              # TBD: exact model id served by the endpoint
   base_url: "https://REPLACE-kimi-endpoint/v1"  # TBD
 
+# One shared conversation per channel (not per user), so everyone who tags the bot
+# sees the same context, and delivered cron messages can attach to the channel session.
+group_sessions_per_user: false
+
 # Health of the agent itself -> OTLP collector -> Prometheus/Grafana (alerts in deploy/monitoring.yaml).
 # Exports gateway/platform up, cron scheduler heartbeat, overdue jobs, and one span per cron run.
 monitoring:

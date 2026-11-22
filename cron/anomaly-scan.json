@@ -4,5 +4,5 @@
   "script": "anomaly_scan.py",
   "skills": ["anomaly-scan", "noc-tools", "noc-environment"],
   "prompt": "Follow the anomaly-scan skill on the script output above. If it is empty, answer exactly [SILENT].",
-  "deliver": "slack"
+  "deliver": "mattermost"
 }

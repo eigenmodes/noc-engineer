@@ -14,7 +14,7 @@ Built as a [Hermes Agent profile distribution](https://hermes-agent.nousresearch
 | Daily anomaly summary -> team channel | 09:00 | `daily-summary` |
 | New Grafana alerts -> where the problem is | every 2 min | `grafana-alert` |
 | Customer Jira tickets -> comment with the location | every 5 min | `jira-ticket` |
-| Questions from the team or customers | Slack message | `customer-question` |
+| Questions from the team or customers | Mattermost message | `customer-question` |
 
 ## How it works
 
@@ -27,7 +27,7 @@ flowchart LR
     T --> E[(Elasticsearch)]
     T --> G[(Grafana)]
     T --> J[(Jira)]
-    A --> O[Slack / Jira comment]
+    A --> O[Mattermost / Jira comment]
 ```
 
 1. A **cron job** runs a small Python script. The script does the boring, repeatable work: polling, comparison, deduplication.
@@ -58,10 +58,10 @@ tests/                                    offline tests with fake HTTP
 ```bash
 hermes profile install github.com/eigenmodes/noc-engineer --alias
 # fill ~/.hermes/profiles/noc-engineer/.env with the variables it lists, then schedule the cron jobs:
-noc-engineer cron create "*/5 * * * *" "Follow the anomaly-scan skill on the script output above. If it is empty, answer exactly [SILENT]." --name anomaly-scan --script anomaly_scan.py --skill anomaly-scan --skill noc-tools --skill noc-environment --deliver slack
-noc-engineer cron create "0 9 * * *" "Follow the daily-summary skill on the digest above and write the 09:00 message for the team." --name daily-summary --script anomaly_digest.py --skill daily-summary --skill noc-tools --deliver slack
-noc-engineer cron create "*/2 * * * *" "Follow the grafana-alert skill on the new alerts above. If there are none, answer exactly [SILENT]." --name grafana-alerts --script grafana_poll.py --skill grafana-alert --skill noc-tools --skill noc-environment --deliver slack
-noc-engineer cron create "*/5 * * * *" "Follow the jira-ticket skill on the tickets above. If there are none, answer exactly [SILENT]." --name jira-tickets --script jira_poll.py --skill jira-ticket --skill noc-tools --skill noc-environment --deliver slack
+noc-engineer cron create "*/5 * * * *" "Follow the anomaly-scan skill on the script output above. If it is empty, answer exactly [SILENT]." --name anomaly-scan --script anomaly_scan.py --skill anomaly-scan --skill noc-tools --skill noc-environment --deliver mattermost
+noc-engineer cron create "0 9 * * *" "Follow the daily-summary skill on the digest above and write the 09:00 message for the team." --name daily-summary --script anomaly_digest.py --skill daily-summary --skill noc-tools --deliver mattermost
+noc-engineer cron create "*/2 * * * *" "Follow the grafana-alert skill on the new alerts above. If there are none, answer exactly [SILENT]." --name grafana-alerts --script grafana_poll.py --skill grafana-alert --skill noc-tools --skill noc-environment --deliver mattermost
+noc-engineer cron create "*/5 * * * *" "Follow the jira-ticket skill on the tickets above. If there are none, answer exactly [SILENT]." --name jira-tickets --script jira_poll.py --skill jira-ticket --skill noc-tools --skill noc-environment --deliver mattermost
 noc-engineer gateway run
 ```
 

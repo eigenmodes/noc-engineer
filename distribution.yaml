@@ -1,13 +1,14 @@
 name: noc-engineer
 version: 0.2.0
-description: NOC agent - anomaly scan, daily summary, Slack questions, Grafana alerts, customer Jira tickets
+description: NOC agent - anomaly scan, daily summary, Mattermost questions, Grafana alerts, customer Jira tickets
 author: Eigenmodes
 env_requires:
   - {name: OPENAI_API_KEY, description: "Key for the Kimi K3 endpoint in config.yaml", required: true}
-  - {name: SLACK_BOT_TOKEN, description: "Slack bot token", required: true}
-  - {name: SLACK_APP_TOKEN, description: "Slack app token (Socket Mode)", required: true}
-  - {name: SLACK_ALLOWED_USERS, description: "Member IDs allowed to talk to the agent", required: true}
-  - {name: SLACK_HOME_CHANNEL, description: "Team channel for cron output", required: true}
+  - {name: MATTERMOST_URL, description: "Mattermost server URL", required: true}
+  - {name: MATTERMOST_TOKEN, description: "Bot account token", required: true}
+  - {name: MATTERMOST_ALLOWED_USERS, description: "User IDs (26 chars, comma-separated) allowed to talk to the agent", required: true}
+  - {name: MATTERMOST_HOME_CHANNEL, description: "Team channel ID for cron output", required: true}
+  - {name: MATTERMOST_REPLY_MODE, description: "off = answer in the channel; thread = answer in a thread", required: false, default: "off"}
   - {name: PROMETHEUS_URL, description: "Prometheus / Thanos Query", required: true}
   - {name: PROMETHEUS_TOKEN, description: "Read-only token", required: false}
   - {name: ECK_URL, description: "Elasticsearch (ECK)", required: false}
