@@ -65,8 +65,9 @@ Default `distribution_owned` is `SOUL.md, config.yaml, mcp.json, skills, cron, d
 
 ### 3.2 `SOUL.md`
 Keep identity, voice and the hard rules about uncertainty (cite evidence, never invent values, say what
-was not checked). Move routing ("for X use skill Y") into each skill's frontmatter `description`, and
-paths, commands and workflows into skills. Target: short enough to read in one screen.
+was not checked). Paths, commands and workflows go into skills. A short "what you handle → which
+skill" list may stay (it helps weaker models pick the skill); every skill's frontmatter `description`
+must still say when to use it. Target: one screen.
 
 ### 3.3 Cron: pick one, not both
 **A. Not installed with `hermes profile install/update` (one deployment you manage):** keep the `.sh`
@@ -102,7 +103,7 @@ It must never delete or overwrite `$HERMES_HOME/cron/` (that is `jobs.json` + ru
 ### 3.5 `config.yaml` keys this agent needs (all exist in v0.22.5)
 ```yaml
 group_sessions_per_user: false      # top level; one shared conversation per channel
-session_reset: {mode: daily, at_hour: 8}
+cron: {mirror_delivery: true}       # best effort on Mattermost; see HERMES-UPDATE-PROMPT.md
 agent: {api_max_retries: 3, auto_recovery_cycles: 5}   # defaults; 503 handling
 # fallback_providers: [...]          # only if a second model endpoint exists
 monitoring:
@@ -127,7 +128,7 @@ skills/.*
 
 ## 4. Done means
 1. `tree` matches section 1; nothing from the "never in git" list is tracked (`git ls-files`).
-2. `SOUL.md` has no paths, commands or skill routing.
+2. `SOUL.md` fits one screen and has no paths or workflows.
 3. Every skill has a `SKILL.md` whose `description` says when to use it.
 4. Cron (A): running the `.sh` twice leaves the same job count; `cron_settings.py --check --attach ...` → all `OK`.
    Cron (B): `cron/jobs.json` is the only file under `cron/` in git; after install + resume, `hermes cron list` shows every job enabled.

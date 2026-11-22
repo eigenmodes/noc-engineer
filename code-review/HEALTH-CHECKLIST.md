@@ -44,11 +44,11 @@ Severity: **P0** = the agent is down or wrong now. **P1** = will break or leak s
 |---|---|---|---|---|
 | 4.1 | P0 | `hermes cron list` | every job present, enabled, sensible next run | Recreate from the bash script / `cron/*.json` |
 | 4.2 | P0 | Each job's `deliver` | `mattermost` for channel jobs | Edit or recreate the job |
-| 4.3 | P1 | `python3 cron_settings.py --check --attach <job names>` (or `--check <cron dir>`) | `OK` for every job | `cron list` does not show `attach_to_session`. Run without `--check` to apply |
+| 4.3 | P2 | Mirror on: `cron.mirror_delivery: true` (enough for `--deliver mattermost`), or per job `attach_to_session` checked with `python3 cron_settings.py --check --attach <job names>` | on | `cron list` does not show `attach_to_session`. On Mattermost v0.22.5 the mirror is best effort (see 5.3); 5.1 is what must work |
 | 4.4 | P1 | Restart the pod twice, repeat 4.3 | still `OK` | Something rewrites the cron store: see 1.5 |
 | 4.5 | P1 | Polling scripts print `{"wakeAgent": false}` as the last line when there is nothing new (empty stdout still wakes the model) | the model is not woken every few minutes for nothing | See `WAKE-AGENT.md` |
 | 4.6 | P2 | `cron.wrap_response` | `false` if the cron header/footer is noise in the channel | Set it |
-| 4.7 | P2 | `--continuity` on the daily summary (if `hermes cron edit --help` lists it) | on | The summary sees yesterday's and can say what is new or resolved. Not related to chat follow-ups |
+| 4.7 | P2 | `--continuity` on the daily summary (`hermes cron edit <id> --continuity`; exists in v0.22.5) | on | The summary sees yesterday's and can say what is new or resolved. Not related to chat follow-ups |
 | 4.8 | P1 | `ls $HERMES_HOME/cron/output/*/` | recent run files per job | Jobs are not running: scheduler, model or script errors (`## Error` section in the run file) |
 
 ## 5. Explaining its own messages
@@ -56,14 +56,14 @@ Severity: **P0** = the agent is down or wrong now. **P1** = will break or leak s
 |---|---|---|---|---|
 | 5.1 | P1 | Chat skill has section `## Your own messages` | reads `cron/output/*/*` before answering about a cron message | Add it (see HERMES-UPDATE-PROMPT.md) |
 | 5.2 | P1 | `SOUL.md` has the same rule in one line | present | Weak models may not load the skill; SOUL.md is always in the prompt |
-| 5.3 | P1 | After a delivery of an attached job: gateway debug log | `Mirror: wrote to session` | `Mirror: no session found` = 3.5 is `true`, or nobody talked in the channel since the last reset |
+| 5.3 | P2 | After a delivery: gateway debug log | `Mirror: wrote to session` | `Mirror: no session found` = no live session in the channel yet, or live sessions there (channel + threads) belong to several users. Mattermost has no thread/in_channel cron path in v0.22.5, so this lookup is the only mirror path |
 | 5.4 | P1 | `@bot explain this morning's summary` | quotes the real message, then the evidence | Check 2.2, then 5.1 |
 | 5.5 | P2 | Every cron message carries an ID (e.g. `[INV-0412]`) | asking by ID finds the exact file | Add the ID to the message templates |
 
 ## 6. Context and memory
 | # | Sev | Check | Expected | If it fails |
 |---|---|---|---|---|
-| 6.1 | P1 | `config.yaml` `session_reset` | `mode: daily`, `at_hour` before 09:00 | The shared channel conversation grows from every user and every mirrored cron message; compression runs constantly and drops detail |
+| 6.1 | P2 | Long channel conversation | compressed by Hermes; someone sends `/new` in the channel when it drifts | v0.22.5 has no time-based reset (`session_reset` does not exist). Note `/new` also leaves no live session for the mirror until the next message |
 | 6.2 | P2 | `memories/MEMORY.md` (cap 2,200 chars), `memories/USER.md` (cap 1,375) | durable facts only, no incident logs | Clean them; incidents belong in files, not memory |
 | 6.3 | P2 | `du -h $HERMES_HOME/state.db` week over week | grows slowly | Fast growth = cron waking the model for nothing (4.5) |
 

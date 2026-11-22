@@ -1,5 +1,6 @@
 name: noc-engineer
-version: 0.2.0
+version: 0.3.0
+hermes_requires: ">=0.22.5"   # attach_to_session, cron mirror, jobs.json merge (verified in v0.22.5 source)
 description: NOC agent - anomaly scan, daily summary, Mattermost questions, Grafana alerts, customer Jira tickets
 author: Eigenmodes
 env_requires:

@@ -12,38 +12,53 @@ and the data behind it.
 Every cron run is a separate, isolated session. Its message is posted to the channel but is not part
 of the channel conversation, so the bot that answers a tag has never seen it.
 
-## Verified Hermes v0.22.5 behavior
-- `attach_to_session` (per job) puts the delivered cron message into the channel conversation, so a
-  follow-up in the channel has it. In v0.22.5 it exists on the job but:
-  - `hermes cron create` / `hermes cron edit` have no flag for it,
-  - `hermes cron list` does not show it.
-  It is set through Hermes' Python API `cron.jobs.update_job(job_id, {"attach_to_session": True})`
-  (what `cron_settings.py` below does) and stored in `$HERMES_HOME/cron/jobs.json`.
-- The Mattermost adapter does not open a separate thread per delivery: with `--deliver mattermost`
-  (home channel) the message is mirrored into the home channel's conversation.
-- The mirror finds the target conversation by platform + chat, then user. Cron has no user, so if
-  several people have their own conversation in the channel, nothing is written (debug log
-  `Mirror: no session found`). Fix: `group_sessions_per_user: false` (one conversation per channel).
-- `group_sessions_per_user` is top-level in `config.yaml`. Default `true`. Deleting the line keeps
-  `true`; it must be written as `false`. DMs are one conversation per DM either way.
-- `MATTERMOST_REPLY_MODE`: `off` (default, replies in the channel) or `thread` (reply in a thread whose
-  context is separate from the channel). Use `off`.
-- `--continuity` is unrelated: it gives a job its own previous output on the next run (useful for the
-  daily summary to compare with yesterday). It does not put anything into the channel conversation.
+## Verified Hermes v0.22.5 behavior (`cron/scheduler_delivery.py`, `gateway/mirror.py`, `hermes_state_sessions.py`)
+- A cron message enters a chat conversation only through the delivery mirror. It is on for a job when
+  the job's `attach_to_session` is `true`, or, if the job does not set it, when global
+  `cron.mirror_delivery` is `true`. For `--deliver mattermost` (the home channel) the global flag is
+  enough. `attach_to_session` is required only for explicit `mattermost:<chat_id>` targets.
+- `attach_to_session` has no CLI flag in v0.22.5 (or v0.23.3) and `hermes cron list` does not show it.
+  `cron_settings.py` (below) sets and checks it through Hermes' own `cron.jobs.update_job`.
+- Mattermost has neither of the two reliable paths Hermes has: it cannot open a thread per delivery
+  (`create_handoff_thread` not implemented) and does not support the `in_channel` surface (only Slack
+  sets `supports_inchannel_continuable`). So Hermes falls back to looking up an existing live session
+  for that channel, without a user:
+  - no live session in the channel yet (nobody talked to the bot there, or after `/new`/`/reset`) →
+    nothing written;
+  - live sessions in that channel (the channel session plus any thread sessions) belong to more than
+    one distinct user → nothing written ("never another participant's session");
+  - otherwise it is appended to the most recently started live session of that channel, which may be a
+    thread session rather than the channel itself.
+  A miss is silent (debug log `Mirror: no session found`). v0.23.3 changed the lookup to probe the
+  channel session first.
+- `group_sessions_per_user: false` (top level in `config.yaml`; default `true`, so it must be written)
+  makes the channel one shared session. With `true` every user has a session in the channel and the
+  lookup above always finds several users → never mirrored. DMs are one session per DM either way.
+- `MATTERMOST_REPLY_MODE`: `off` (default, replies in the channel) or `thread` (each reply in a thread
+  with its own session). Use `off`: thread sessions from several users also block the mirror.
+- There is no time-based session reset in v0.22.5 (no `session_reset`/`idle_minutes`/`at_hour` in the
+  code). Sessions reset only with `/new` or `/reset` in the chat; long conversations are compressed.
 - Every run is saved to `$HERMES_HOME/cron/output/<job_id>/` (silent runs too).
 - `$HERMES_HOME/cron/` is Hermes' own store (`jobs.json` + run output). Never delete or replace it.
 
+**Conclusion:** on Mattermost v0.22.5 the mirror is best effort. The reliable mechanism is the skill
+section in step 4 (read `cron/output`). Configure the mirror too, but never depend on it.
+
 ## Changes
-1. `config.yaml`, top level:
+1. `config.yaml`:
    ```yaml
-   group_sessions_per_user: false
+   group_sessions_per_user: false   # top level
+   cron:
+     mirror_delivery: true          # home-channel deliveries are mirrored when the lookup succeeds
    ```
 2. Env (`.env` / k8s Secret): `MATTERMOST_REPLY_MODE` removed or `off`; `MATTERMOST_HOME_CHANNEL` set.
 3. The bash script that creates the cron jobs:
    - Every job that posts to the channel uses `--deliver mattermost`.
    - If the script or the container entrypoint runs `rm -rf` / `cp -r` over `$HERMES_HOME/cron`, remove
      that. It deletes all jobs, their settings and run history on every run.
-   - Add `cron_settings.py` (below) to the repo, next to the bash script, and add as the last line:
+   - With `cron.mirror_delivery: true` (step 1) home-channel jobs need nothing more. Only if a job
+     delivers to an explicit `mattermost:<chat_id>`, or you want the setting pinned per job even if the
+     global flag changes, add `cron_settings.py` (below) next to the bash script and as the last line:
      ```sh
      python3 "$(dirname "$0")/cron_settings.py" --attach <job names people ask about>
      ```
@@ -90,7 +105,7 @@ Without a backup endpoint the two `agent` defaults already apply; change nothing
 - No secrets in git.
 
 ## Verify on the running system, then report
-1. `python3 cron_settings.py --check --attach <same names>` prints `OK` for every job.
+1. `config.yaml` has `cron.mirror_delivery: true` and `group_sessions_per_user: false`; if `cron_settings.py` is used, `--check --attach <same names>` prints `OK` for every job.
 2. `ls -t "$HERMES_HOME"/cron/output/*/* | head` shows files. If the layout differs, fix the glob in the skill and SOUL.md.
 3. Restart the gateway, then restart again and repeat step 1: still `OK` (nothing wipes the cron store).
 4. Tag test: `@bot run ls -t $HERMES_HOME/cron/output/*/* | head -5`. A file list = tool calling and

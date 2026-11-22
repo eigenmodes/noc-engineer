@@ -69,7 +69,7 @@ noc-engineer gateway run
 
 Kubernetes: build `deploy/Dockerfile`, create the Secret `hermes-noc-env`, apply `deploy/k8s.yaml`. The pod syncs the profile and schedules the cron jobs on start.
 
-`daily-summary`, `anomaly-scan` and `grafana-alerts` have `attach_to_session: true`: their messages enter the channel conversation, so tagging the bot about them works. `hermes cron create` has no flag for it and `hermes cron list` does not show it, so `deploy/cron_settings.py` applies it on start. Check on the pod:
+`daily-summary`, `anomaly-scan` and `grafana-alerts` have `attach_to_session: true`, so their messages are mirrored into the channel conversation when Hermes finds a live channel session (best effort on Mattermost v0.22.5). Explaining a message never depends on that: the `customer-question` skill reads it from `cron/output`. `hermes cron create` has no flag for `attach_to_session` and `hermes cron list` does not show it; `deploy/cron_settings.py` applies it on start. Check on the pod:
 
 ```sh
 python3 /opt/noc-engineer/cron_settings.py --check /opt/noc-engineer/cron   # OK / DIFF / MISSING per job

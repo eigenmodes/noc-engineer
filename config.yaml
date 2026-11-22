@@ -7,6 +7,12 @@ model:
 # sees the same context, and delivered cron messages can attach to the channel session.
 group_sessions_per_user: false
 
+# Mirror cron deliveries to the home channel into the channel conversation. Best effort on Mattermost
+# (v0.22.5): it lands only when the channel has one live session. Explaining a message never depends
+# on it: customer-question reads cron/output.
+cron:
+  mirror_delivery: true
+
 # Health of the agent itself -> OTLP collector -> Prometheus/Grafana (alerts in deploy/monitoring.yaml).
 # Exports gateway/platform up, cron scheduler heartbeat, overdue jobs, and one span per cron run.
 monitoring:

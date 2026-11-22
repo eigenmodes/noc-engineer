@@ -80,3 +80,11 @@ def test_cron_settings():
         j = json.loads(f.read_text())
         assert j.get("attach_to_session", True) is True, f.name
     assert json.loads((ROOT / "cron" / "daily-summary.json").read_text())["attach_to_session"] is True
+
+
+def test_versions_and_mirror():
+    dist = yaml.safe_load((ROOT / "distribution.yaml").read_text())
+    assert dist["hermes_requires"] == ">=0.22.5"
+    cfg = yaml.safe_load((ROOT / "config.yaml").read_text())
+    assert cfg["cron"]["mirror_delivery"] is True
+    assert "session_reset" not in cfg                       # does not exist in v0.22.5 (ignored by core)
