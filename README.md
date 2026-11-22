@@ -49,8 +49,8 @@ distribution.yaml  SOUL.md  config.yaml   profile identity, rules and model sett
 skills/<name>/SKILL.md                    the agent's playbooks
 scripts/                                  cron scripts (deterministic)
 cron/*.json                               cron job definitions
-deploy/                                   Dockerfile, start.sh, cron_settings.py, k8s.yaml, monitoring.yaml
-code-review/                              for coding agents: HERMES-STRUCTURE, HEALTH-CHECKLIST, HERMES-UPDATE-PROMPT, WAKE-AGENT, MIGRATION-v0.22.5-to-v0.23.3,
+deploy/                                   Dockerfile, start.sh, cron_settings.py, e2e_check.py, k8s.yaml, monitoring.yaml
+code-review/                              for coding agents: HERMES-STRUCTURE, HEALTH-CHECKLIST, HERMES-UPDATE-PROMPT, WAKE-AGENT, MIGRATION-v0.22.5-to-v0.23.3, E2E-CHECKS,
                                           HERMES-REFERENCE-v0.22.5 (official docs), hermes-agent/ (v0.22.5 source, submodule)
 tests/                                    offline tests with fake HTTP
 ```
@@ -85,6 +85,13 @@ Environment-specific values are deliberately left as `TBD`, never invented:
 - `skills/noc-tools/assets/noc.yaml`: anomaly PromQL per check, Elasticsearch index, customer JQL, pipeline hop ids
 - `skills/noc-environment/SKILL.md`: data path, metric per hop, known failure patterns
 - `deploy/k8s.yaml`: image and namespace
+
+## Checking a deploy
+
+```sh
+kubectl exec deploy/hermes-noc -- python3 /opt/noc-engineer/e2e_check.py   # exit 0 = no P0/P1 failure
+```
+What each check means and the manual Mattermost scenarios: `code-review/E2E-CHECKS.md`.
 
 ## Monitoring
 
