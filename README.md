@@ -50,7 +50,8 @@ skills/<name>/SKILL.md                    the agent's playbooks
 scripts/                                  cron scripts (deterministic)
 cron/*.json                               cron job definitions
 deploy/                                   Dockerfile, start.sh, cron_settings.py, k8s.yaml, monitoring.yaml
-docs/HERMES-REFERENCE-v0.22.5.md          official Hermes docs (config, env vars, CLI, cron, skills, sessions...), one file, grep it
+code-review/                              for coding agents: HERMES-STRUCTURE, HEALTH-CHECKLIST, HERMES-UPDATE-PROMPT,
+                                          HERMES-REFERENCE-v0.22.5 (official docs), hermes-agent/ (v0.22.5 source, submodule)
 tests/                                    offline tests with fake HTTP
 ```
 

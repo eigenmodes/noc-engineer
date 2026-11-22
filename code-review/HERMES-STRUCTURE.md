@@ -1,7 +1,7 @@
 # Task: bring a Hermes agent project to the structure Hermes recommends (v0.22.5)
 
 Give this file to the coding agent. Facts here come from the Hermes v0.22.5 docs and source
-(`docs/HERMES-REFERENCE-v0.22.5.md` in this repo has the official text). Do not add anything that is
+(`code-review/HERMES-REFERENCE-v0.22.5.md` has the official text; `code-review/hermes-agent/` is the v0.22.5 source). Do not add anything that is
 not here or there. If the project does not match an assumption below, stop and report.
 
 ## 1. Where it must end up
@@ -25,7 +25,7 @@ not here or there. If the project does not match an assumption below, stop and r
 ├── .gitignore                # see 3.6
 ├── README.md                 # for humans
 ├── deploy/                   # Dockerfile, entrypoint, k8s, alerts (not installed into the profile)
-├── docs/                     # notes for humans and coding agents (not installed)
+├── code-review/              # notes, checklists and Hermes reference for coding agents (not installed)
 └── tests/                    # (not installed)
 ```
 
@@ -133,5 +133,5 @@ skills/.*
    Cron (B): `cron/jobs.json` is the only file under `cron/` in git; after install + resume, `hermes cron list` shows every job enabled.
 5. Restart twice: jobs, their settings and `cron/output/` history are still there.
 6. In Mattermost: `@bot explain this morning's summary` quotes the real message.
-7. `HEALTH-CHECKLIST.md`: no P0 or P1 failure.
+7. `code-review/HEALTH-CHECKLIST.md`: no P0 or P1 failure.
 8. Report: which cron option was used, every deviation from this file, and anything not verified.
