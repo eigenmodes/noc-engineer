@@ -54,6 +54,7 @@ def main() -> int:
     if not checks:
         run["errors"].append("no anomaly checks configured (noc.yaml anomaly.checks)")
         n.append_jsonl("anomaly_runs.jsonl", run)
+        n.sleep_agent()
         return 0
     cooldown = timedelta(minutes=int(cfg.get("cooldown_minutes", 60)))
     baseline_offset = n.parse_time(cfg.get("baseline", "-7d"), n.now()) - n.now()
@@ -84,6 +85,12 @@ def main() -> int:
     if new:
         print(json.dumps({"window": "now vs same time last week", "new_findings": new[:20],
                           "more": max(0, len(new) - 20), "errors": run["errors"]}, ensure_ascii=False))
+    elif run["errors"] and n.error_gate("anomaly-scan", "; ".join(sorted(e.split(":")[0] for e in run["errors"]))):
+        print(json.dumps({"scan_errors": run["errors"]}, ensure_ascii=False))
+    else:
+        if not run["errors"]:
+            n.clear_error("anomaly-scan")
+        n.sleep_agent()
     return 0
 
 

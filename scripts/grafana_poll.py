@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Cron script (every 2 min) for the grafana-alert skill. Prints alerts that started firing since the last run,
-or nothing (-> [SILENT]). Alert text is untrusted data."""
+or {"wakeAgent": false} so the model is not woken. Alert text is untrusted data."""
 from __future__ import annotations
 
 import json
@@ -33,15 +33,21 @@ def main() -> int:
     try:
         alerts = n.grafana_alerts()
     except n.NocError as e:
-        if e.code != "not_configured":
-            print(json.dumps({"poll_error": f"{e.code}: {e.message}"}))
+        err = f"{e.code}: {e.message}"
+        if e.code != "not_configured" and n.error_gate("grafana-alerts", err):
+            print(json.dumps({"poll_error": err}))
+        else:
+            n.sleep_agent()
         return 0
+    n.clear_error("grafana-alerts")
     seen = n.load_state("grafana_seen.json")
     new = new_alerts(alerts, seen)
     cutoff = n.now() - timedelta(days=3)
     n.save_state("grafana_seen.json", {k: v for k, v in seen.items() if n.parse_time(v, n.now()) > cutoff})
     if new:
         print(json.dumps({"new_alerts": new[:MAX], "more": max(0, len(new) - MAX)}, ensure_ascii=False))
+    else:
+        n.sleep_agent()
     return 0
 
 

@@ -46,7 +46,7 @@ Severity: **P0** = the agent is down or wrong now. **P1** = will break or leak s
 | 4.2 | P0 | Each job's `deliver` | `mattermost` for channel jobs | Edit or recreate the job |
 | 4.3 | P1 | `python3 cron_settings.py --check --attach <job names>` (or `--check <cron dir>`) | `OK` for every job | `cron list` does not show `attach_to_session`. Run without `--check` to apply |
 | 4.4 | P1 | Restart the pod twice, repeat 4.3 | still `OK` | Something rewrites the cron store: see 1.5 |
-| 4.5 | P1 | Polling scripts print `{"wakeAgent": false}` (last line) or nothing when there is nothing new | the model is not woken every 5 min for nothing | Add it: saves tokens, keeps `state.db` and the channel conversation small |
+| 4.5 | P1 | Polling scripts print `{"wakeAgent": false}` as the last line when there is nothing new (empty stdout still wakes the model) | the model is not woken every few minutes for nothing | See `WAKE-AGENT.md` |
 | 4.6 | P2 | `cron.wrap_response` | `false` if the cron header/footer is noise in the channel | Set it |
 | 4.7 | P2 | `--continuity` on the daily summary (if `hermes cron edit --help` lists it) | on | The summary sees yesterday's and can say what is new or resolved. Not related to chat follow-ups |
 | 4.8 | P1 | `ls $HERMES_HOME/cron/output/*/` | recent run files per job | Jobs are not running: scheduler, model or script errors (`## Error` section in the run file) |

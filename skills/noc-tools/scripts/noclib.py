@@ -285,6 +285,32 @@ def save_state(name: str, state: dict) -> None:
     tmp.replace(p)
 
 
+# --- cron wake gate -----------------------------------------------------------------------------
+# Hermes skips the model only when the LAST non-empty stdout line is {"wakeAgent": false}.
+# Empty stdout still wakes the model (for agent jobs). Every quiet path must call sleep_agent().
+
+def sleep_agent() -> None:
+    print(json.dumps({"wakeAgent": False}))
+
+
+def error_gate(job: str, error: str, repeat_minutes: int = 60) -> bool:
+    """True = wake the agent to report this error: it is new, or the same error was last reported
+    at least repeat_minutes ago. Stops a backend outage from posting every few minutes."""
+    st, t = load_state("error_gate.json"), now()
+    last = st.get(job)
+    if last and last.get("error") == error and parse_time(last["at"], t) > t - timedelta(minutes=repeat_minutes):
+        return False
+    st[job] = {"error": error, "at": iso(t)}
+    save_state("error_gate.json", st)
+    return True
+
+
+def clear_error(job: str) -> None:
+    st = load_state("error_gate.json")
+    if st.pop(job, None) is not None:
+        save_state("error_gate.json", st)
+
+
 def append_jsonl(name: str, rec: dict) -> None:
     with (data_dir() / name).open("a") as f:
         f.write(json.dumps(rec, default=str) + "\n")

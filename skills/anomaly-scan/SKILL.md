@@ -7,8 +7,8 @@ description: "Turn new anomaly findings (metric now vs same time last week) into
 
 The cron script already compared every configured metric with the same time last week and passed you only NEW findings.
 
-1. If the script output is empty, answer exactly `[SILENT]`.
-2. If the output has only `errors` and no findings, answer `[SILENT]`.
+1. Quiet runs never reach you: the script prints `{"wakeAgent": false}` and Hermes skips the model. If the input is still empty, answer exactly `[SILENT]`.
+2. If the input has only `scan_errors`, post one line naming the failing checks and the error code. It is sent at most once an hour per error.
 3. Group findings that are likely the same event (same time, related servers/rules, port in and port out together).
 4. For the most significant group, run 1-3 quick checks with `noc-tools` (the window before onset, neighbours, other hops) to say WHERE it is. Do not run a full investigation.
 5. Message format (Mattermost, short):

@@ -33,18 +33,26 @@ def main() -> int:
     j = n.section("jira")
     jql = j.get("customer_jql")
     if n.is_tbd(jql) or n.is_tbd(j.get("url")):
+        n.sleep_agent()
         return 0
     seen = n.load_state("jira_seen.json")
     try:
         body = n.jira_search(f"({jql}) AND updated >= -30m ORDER BY updated ASC", 50,
                              "summary,status,priority,updated,description,comment")
     except n.NocError as e:
-        print(json.dumps({"poll_error": f"{e.code}: {e.message}"}))
+        err = f"{e.code}: {e.message}"
+        if n.error_gate("jira-tickets", err):
+            print(json.dumps({"poll_error": err}))
+        else:
+            n.sleep_agent()
         return 0
+    n.clear_error("jira-tickets")
     new = changed(body.get("issues", []), seen, j.get("comment_marker", "noc-engineer"))
     n.save_state("jira_seen.json", dict(list(seen.items())[-2000:]))
     if new:
         print(json.dumps({"tickets": new[:MAX], "more": max(0, len(new) - MAX)}, ensure_ascii=False))
+    else:
+        n.sleep_agent()
     return 0
 
 
