@@ -4,7 +4,7 @@
 
 Built as a [Hermes Agent profile distribution](https://hermes-agent.nousresearch.com/docs/user-guide/profile-distributions): the repo root *is* the agent. Read-only by design.
 
-![tests](https://img.shields.io/badge/tests-offline-brightgreen) ![mode](https://img.shields.io/badge/production%20access-read--only-orange)
+[![tests](https://github.com/eigenmodes/noc-engineer/actions/workflows/tests.yml/badge.svg)](https://github.com/eigenmodes/noc-engineer/actions/workflows/tests.yml) ![license](https://img.shields.io/badge/license-MIT-blue) ![mode](https://img.shields.io/badge/production%20access-read--only-orange)
 
 ## What it does
 
