@@ -9,7 +9,7 @@
 
 Exit code: 2 = a P0 check failed, 1 = a P1 check failed, 0 = otherwise.
 Read-only except the model test call (a few tokens) and --run-job. Never prints secrets.
-What each check means and how to fix it: code-review/E2E-CHECKS.md.
+What each check means and how to fix it: guides/E2E-CHECKS.md.
 """
 from __future__ import annotations
 

@@ -1,7 +1,7 @@
 # Migration: Hermes v0.22.5 → v0.23.3 (Docker / Kubernetes, Mattermost)
 
 For the coding agent or the operator doing the upgrade. Every statement was checked in the source of both
-tags (`code-review/hermes-agent` is v0.22.5; v0.23.3 is tag `v0.23.3` of NousResearch/hermes-agent) and
+tags (`guides/hermes-agent` is v0.22.5; v0.23.3 is tag `v0.23.3` of NousResearch/hermes-agent) and
 in v0.23.3's `website/docs/getting-started/updating.md`. If something on the system does not match, stop.
 
 ## 0. Decide first
@@ -49,7 +49,7 @@ tar czf hermes-home-v0.22.5-$(date +%F).tgz -C /data hermes
    Mattermost bot token or no Mattermost env at all**: two gateways on one bot token both answer.
    Do not run two pods on the same PVC.
 3. Watch the first start: config migration notes, `state.db` migration, no traceback.
-4. Run `code-review/HEALTH-CHECKLIST.md` against it (sections 1–6 and 9).
+4. Run `guides/HEALTH-CHECKLIST.md` against it (sections 1–6 and 9).
 5. Cron: `hermes cron list` shows every job enabled; `python3 /opt/noc-engineer/cron_settings.py --check /opt/noc-engineer/cron` → all `OK`; trigger one job (`hermes cron run <id>`) and check `cron/output/<id>/`.
 
 ## 5. Build
@@ -73,8 +73,8 @@ Use the image tag that `hermes --version` confirms; do not use `latest`.
    `Mirror: wrote to session`; `@bot explain the last <job> message` quotes it.
 6. Update repo: `distribution.yaml` `hermes_requires: ">=0.23.3"` only if you start using a 0.23-only
    feature (e.g. job `timezone`); otherwise leave `>=0.22.5`. Re-pin the submodule:
-   `git -C code-review/hermes-agent fetch --depth 1 origin tag v0.23.3 && git -C code-review/hermes-agent checkout v0.23.3`,
-   and regenerate `code-review/HERMES-REFERENCE-*.md` from that tag.
+   `git -C guides/hermes-agent fetch --depth 1 origin tag v0.23.3 && git -C guides/hermes-agent checkout v0.23.3`,
+   and regenerate `guides/HERMES-REFERENCE-*.md` from that tag.
 
 ## 7. Rollback
 Not by switching the image back on the same PVC (the old release refuses parts of an upgraded store).

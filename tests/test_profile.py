@@ -1,3 +1,4 @@
+import pytest
 import json
 import re
 from pathlib import Path
@@ -88,3 +89,38 @@ def test_versions_and_mirror():
     cfg = yaml.safe_load((ROOT / "config.yaml").read_text())
     assert cfg["cron"]["mirror_delivery"] is True
     assert "session_reset" not in cfg                       # does not exist in v0.22.5 (ignored by core)
+
+
+def _hermes_metric_names():
+    src = ROOT / "guides" / "hermes-agent" / "agent" / "monitoring" / "gateway_health_export.py"
+    if not src.exists():
+        pytest.skip("submodule not checked out: git submodule update --init --depth 1")
+    import ast
+    tree = ast.parse(src.read_text())
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Assign) and any(getattr(t, "id", "") == "_OBSERVABLE_METRIC_NAMES" for t in node.targets):
+            return {c.value.replace(".", "_") for c in node.value.elts}
+    raise AssertionError("_OBSERVABLE_METRIC_NAMES not found")
+
+
+def test_dashboard_and_alerts_use_real_hermes_metrics():
+    import re
+    known = _hermes_metric_names()
+    dash = json.loads((ROOT / "deploy" / "grafana" / "hermes-noc-dashboard.json").read_text())
+    exprs = [t["expr"] for p in dash["panels"] for t in p.get("targets", [])]
+    rules = yaml.safe_load((ROOT / "deploy" / "monitoring.yaml").read_text())["spec"]["groups"][0]["rules"]
+    exprs += [r["expr"] for r in rules]
+    used = {m for e in exprs for m in re.findall(r"\bhermes_[a-z_]+", e)}
+    labels = {"hermes_platform", "hermes_gateway_state", "hermes_error_code"}
+    assert used - labels <= known, used - labels - known
+    assert dash["uid"] == "hermes-noc" and dash["__inputs"][0]["name"] == "DS_PROMETHEUS"
+
+
+def test_approvals_block_writes():
+    import fnmatch
+    deny = yaml.safe_load((ROOT / "config.yaml").read_text())["approvals"]["deny"]
+    blocked = lambda cmd: any(fnmatch.fnmatch(cmd.lower(), p.lower()) for p in deny)  # noqa: E731
+    for cmd in ("kubectl delete pod x", "helm upgrade a b", "curl -X POST http://x", "psql -c 'drop table'", "git push origin"):
+        assert blocked(cmd), cmd
+    for cmd in ("kubectl get pods -A", "python3 noc.py metrics 'up'", "curl -s http://prom/api/v1/query"):
+        assert not blocked(cmd), cmd

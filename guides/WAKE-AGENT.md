@@ -1,6 +1,6 @@
 # wakeAgent: run the model only when a cron script found something
 
-Verified in the Hermes v0.22.5 source (`code-review/hermes-agent`):
+Verified in the Hermes v0.22.5 source (`guides/hermes-agent`):
 `cron/scheduler_prompt.py::_parse_wake_gate`, `cron/scheduler.py` (wake-gate block before `_build_job_prompt`).
 
 ## The rule

@@ -13,10 +13,10 @@ spec:
           labels: {severity: critical}
           annotations: {summary: "NOC agent gateway down or not exporting"}
         - alert: HermesNocChatDisconnected
-          expr: min by (platform) (hermes_platform_up) == 0
+          expr: min by (hermes_platform) (hermes_platform_up) == 0
           for: 5m
           labels: {severity: critical}
-          annotations: {summary: "NOC agent lost {{ $labels.platform }}: team messages are not received"}
+          annotations: {summary: "NOC agent lost {{ $labels.hermes_platform }}: team messages are not received"}
         - alert: HermesNocCronStalled
           expr: max(hermes_cron_scheduler_heartbeat_age_seconds) > 600
           for: 5m

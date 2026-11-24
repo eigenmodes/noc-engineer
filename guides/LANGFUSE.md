@@ -4,7 +4,7 @@ What it gives: every turn of the agent as one trace (model calls, tool calls wit
 latency, errors), cost per job, and scores to grade answers. Health and alerts stay in Grafana
 (`deploy/monitoring.yaml`); Langfuse answers "why did it answer that".
 
-Verified against: Hermes v0.22.5 source (`code-review/hermes-agent`), Langfuse Helm chart langfuse-k8s
+Verified against: Hermes v0.22.5 source (`guides/hermes-agent`), Langfuse Helm chart langfuse-k8s
 2.2.6 (appVersion 4.83.0, its `examples/minimal-installation`), Langfuse docs for headless
 initialization and the public API. Anything marked **verify** was not tested on a cluster.
 

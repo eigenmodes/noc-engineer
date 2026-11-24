@@ -1,0 +1,13 @@
+# Eval set: past incidents/tickets whose root cause is known. Copy to cases.yaml (keep real cases out of
+# public repos if they contain customer names). Pick incidents still inside Prometheus/ECK retention,
+# otherwise the agent cannot see the data and the case tests nothing.
+- id: INC-EXAMPLE-1
+  kind: alert                       # alert | ticket | question
+  audience: team                    # team | customer (customer = must not leak internal/other customers)
+  question: >-
+    Grafana alert "rule match rate drop" fired on 2026-10-12 14:05 (Asia/Jerusalem) for rule 4711.
+    Where is the problem and why?
+  expect_hop: [kafka]               # any of these must appear: the hop where the problem really was
+  expect_root_cause: [consumer lag, rebalance]   # all = correct, some = partial, none = wrong
+  forbid: []                        # strings that must NOT appear (other customers, internal hosts for customer cases)
+  resolution: "Kafka consumer group rebalanced after a broker restart; lag 40 min; recovered 14:52."

@@ -104,9 +104,9 @@ def test_poll_error_reported_once_then_again_after_recovery(env, fake, capsys):
 
 
 def test_output_matches_hermes_wake_gate():
-    """Run Hermes v0.22.5's own gate function (code-review/hermes-agent) on what the scripts print."""
+    """Run Hermes v0.22.5's own gate function (guides/hermes-agent) on what the scripts print."""
     import ast
-    src = Path(__file__).resolve().parents[1] / "code-review" / "hermes-agent" / "cron" / "scheduler_prompt.py"
+    src = Path(__file__).resolve().parents[1] / "guides" / "hermes-agent" / "cron" / "scheduler_prompt.py"
     if not src.exists():
         pytest.skip("submodule not checked out: git submodule update --init --depth 1")
     tree = ast.parse(src.read_text())

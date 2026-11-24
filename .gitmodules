@@ -1,4 +1,4 @@
-[submodule "code-review/hermes-agent"]
-	path = code-review/hermes-agent
+[submodule "guides/hermes-agent"]
+	path = guides/hermes-agent
 	url = https://github.com/NousResearch/hermes-agent.git
 	shallow = true

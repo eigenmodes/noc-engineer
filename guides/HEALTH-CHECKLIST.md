@@ -77,7 +77,7 @@ Severity: **P0** = the agent is down or wrong now. **P1** = will break or leak s
 ## 8. Safety
 | # | Sev | Check | Expected | If it fails |
 |---|---|---|---|---|
-| 8.1 | P1 | Terminal access | allowlisted read-only commands, or approval before anything else | "read-only" in SOUL.md is a prompt, not a permission |
+| 8.1 | P1 | `config.yaml approvals` | `mode: manual`, cron/one-shot `deny`, `deny:` list blocks write commands | see `SECURITY.md`; "read-only" in SOUL.md alone is a prompt, not a permission |
 | 8.2 | P0 | `git grep -nE "TOKEN=|PASSWORD=|sk-|pk-lf-"` in the repo | nothing | Rotate the secret, move it to the Secret |
 | 8.3 | P1 | Jira write path | off by default; comments validated and de-duplicated | Turn writing off until the quality check (10) passes |
 

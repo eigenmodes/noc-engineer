@@ -16,3 +16,5 @@ data/
 __pycache__/
 .pytest_cache/
 deploy/langfuse/secret.yaml
+evals/results/
+evals/cases.yaml

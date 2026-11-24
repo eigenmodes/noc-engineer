@@ -23,3 +23,52 @@ monitoring:
       enabled: true
       endpoint: "http://REPLACE-otel-collector:4318/v1/traces"   # TBD: OTel Collector (metrics/logs paths derive from it)
       headers_env: {}                                            # header name -> ENV VAR NAME, if the collector needs auth
+
+# Read-only in practice, not only in SOUL.md. Dangerous commands need a human in chat (manual);
+# cron and one-shot runs deny them. `deny` blocks these always (fnmatch, case-insensitive, checked first).
+# Keys verified in Hermes v0.22.5 (guides/HERMES-REFERENCE-v0.22.5.md, "Security"). See guides/SECURITY.md.
+approvals:
+  mode: manual
+  cron_mode: deny
+  single_query_mode: deny
+  unattended_mode: deny
+  deny:
+    - 'kubectl apply*'
+    - 'kubectl create*'
+    - 'kubectl delete*'
+    - 'kubectl edit*'
+    - 'kubectl patch*'
+    - 'kubectl replace*'
+    - 'kubectl scale*'
+    - 'kubectl rollout*'
+    - 'kubectl exec*'
+    - 'kubectl cordon*'
+    - 'kubectl drain*'
+    - 'oc apply*'
+    - 'oc create*'
+    - 'oc delete*'
+    - 'oc edit*'
+    - 'oc patch*'
+    - 'oc scale*'
+    - 'oc rollout*'
+    - 'oc exec*'
+    - 'helm install*'
+    - 'helm upgrade*'
+    - 'helm uninstall*'
+    - 'helm rollback*'
+    - 'argocd app sync*'
+    - 'argocd app delete*'
+    - 'psql*'
+    - 'ssh *'
+    - 'scp *'
+    - 'git push*'
+    - 'systemctl *'
+    - 'reboot*'
+    - 'shutdown*'
+    - '*curl*-X*POST*'
+    - '*curl*-X*PUT*'
+    - '*curl*-X*PATCH*'
+    - '*curl*-X*DELETE*'
+    - '*curl*--data*'
+    - '*curl* -d *'
+    - 'rm -rf *'
