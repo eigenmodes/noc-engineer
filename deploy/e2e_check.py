@@ -336,6 +336,25 @@ def run_job(live, name, timeout):
     record("cron.run_job", "P1", "FAIL", f"{name}: no new run file within {timeout}s (is the gateway running?)")
 
 
+# ---------------- Langfuse ----------------
+
+@check("langfuse.tracing", "P2")
+def c_langfuse():
+    pk, sk = os.environ.get("HERMES_LANGFUSE_PUBLIC_KEY"), os.environ.get("HERMES_LANGFUSE_SECRET_KEY")
+    if not pk:
+        return "SKIP", "HERMES_LANGFUSE_PUBLIC_KEY not set: tracing off"
+    base = os.environ.get("HERMES_LANGFUSE_BASE_URL", "https://cloud.langfuse.com").rstrip("/")
+    n.HTTP.request("GET", base + "/api/public/health")
+    n.HTTP.request("GET", base + "/api/public/projects", headers=n.basic(pk, sk or ""))
+    if shutil.which("hermes"):
+        r = subprocess.run(["hermes", "plugins", "list"], capture_output=True, text=True, timeout=60)
+        line = next((ln for ln in r.stdout.splitlines() if "langfuse" in ln), "")
+        if not line:
+            return "FAIL", "Langfuse reachable, but the langfuse plugin is not installed (LANGFUSE.md step 4)"
+        return "PASS", f"{base} reachable, keys accepted; plugin: {' '.join(line.split())[:80]}"
+    return "PASS", f"{base} reachable, keys accepted"
+
+
 # ---------------- monitoring ----------------
 
 @check("monitoring.status", "P2")
@@ -387,6 +406,7 @@ def main(argv=None):
         c_cron_runs(live)
         if a.run_job:
             run_job(live, a.run_job, a.timeout)
+    c_langfuse()
     if shutil.which("hermes"):
         c_monitoring()
     c_db()

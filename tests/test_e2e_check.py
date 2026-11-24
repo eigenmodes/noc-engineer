@@ -105,3 +105,16 @@ def test_main_exit_code_on_missing_env(ctx, fake, monkeypatch, capsys):
     res = {r["id"]: r for r in json.loads(capsys.readouterr().out)}
     assert code == 2 and res["env.required"]["status"] == "FAIL"
     assert res["backend.prometheus"]["status"] == "PASS"
+
+
+def test_langfuse_check(ctx, fake, monkeypatch):
+    monkeypatch.delenv("HERMES_LANGFUSE_PUBLIC_KEY", raising=False)
+    e.c_langfuse()
+    assert last()["status"] == "SKIP"
+    monkeypatch.setenv("HERMES_LANGFUSE_PUBLIC_KEY", "pk-lf-x")
+    monkeypatch.setenv("HERMES_LANGFUSE_SECRET_KEY", "sk-lf-x")
+    monkeypatch.setenv("HERMES_LANGFUSE_BASE_URL", "http://lf")
+    monkeypatch.setattr(e.shutil, "which", lambda *_: None)
+    fake({"/api/public/health": lambda *a: {"status": "OK"}, "/api/public/projects": lambda *a: {"data": []}})
+    e.c_langfuse()
+    assert last()["status"] == "PASS"

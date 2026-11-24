@@ -24,4 +24,5 @@ env_requires:
   - {name: HERMES_LANGFUSE_PUBLIC_KEY, description: "Langfuse project public key (pk-lf-...). Empty = tracing off", required: false}
   - {name: HERMES_LANGFUSE_SECRET_KEY, description: "Langfuse project secret key (sk-lf-...)", required: false}
   - {name: HERMES_LANGFUSE_BASE_URL, description: "Self-hosted Langfuse URL", required: false}
+  - {name: LANGFUSE_PLUGIN_SOURCE, description: "Git URL#langfuse of the internal mirror of hermes-official-plugins (air-gapped)", required: false}
 distribution_owned: [SOUL.md, config.yaml, skills/, scripts/, cron/, distribution.yaml]

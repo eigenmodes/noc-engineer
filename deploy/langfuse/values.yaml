@@ -1,0 +1,43 @@
+# Langfuse on Kubernetes for the NOC agent. Chart: langfuse-k8s 2.x (checked against 2.2.6, appVersion 4.83.0).
+# Bundled datastores (Postgres, ClickHouse via operator, Valkey, SeaweedFS S3) with credentials from Secret `langfuse`.
+# Air-gapped: mirror the images below into your registry and set the `repository:` overrides (see LANGFUSE.md).
+langfuse:
+  encryptionKey: {secretKeyRef: {name: langfuse, key: encryption-key}}
+  salt: {secretKeyRef: {name: langfuse, key: salt}}
+  nextauth:
+    url: https://langfuse.REPLACE-internal-domain              # TBD: the URL users and Hermes use
+    secret: {secretKeyRef: {name: langfuse, key: nextauth-secret}}
+  features:
+    telemetryEnabled: false          # no calls home from an internal network
+    signUpDisabled: true             # users only via the init user / invitations
+  ingress:
+    enabled: true
+    className: nginx                 # TBD: your ingress class (OpenShift: use a Route instead, see LANGFUSE.md)
+    hosts:
+      - host: langfuse.REPLACE-internal-domain
+        paths: [{path: /, pathType: Prefix}]
+  web:
+    pod:
+      additionalEnvFrom:
+        - secretRef: {name: langfuse-init}   # headless init: org, project, keys, first user
+
+postgresql:
+  auth:
+    existingSecret: langfuse
+    secretKeys: {adminPasswordKey: postgresql-password, userPasswordKey: postgresql-password}
+  settings: {existingSecret: langfuse}
+  userDatabase: {existingSecret: langfuse}
+
+clickhouse:
+  auth: {existingSecret: langfuse, existingSecretKey: clickhouse-password}
+
+redis:
+  auth:
+    existingSecret: langfuse
+    existingSecretPasswordKey: redis-password
+    usersExistingSecret: langfuse
+
+s3:
+  auth: {existingSecret: langfuse, rootUserSecretKey: s3-user, rootPasswordSecretKey: s3-password}
+  allInOne:
+    s3: {existingConfigSecret: langfuse}

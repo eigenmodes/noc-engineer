@@ -47,6 +47,7 @@ If `code-review/hermes-agent/` is empty: `git submodule update --init --depth 1`
 | **Add or change a cron job** | `WAKE-AGENT.md`, `HERMES-STRUCTURE.md` §3.3 | edit `cron/<name>.json` + script in `scripts/`; `attach_to_session` has no CLI flag → `deploy/cron_settings.py`; existing jobs are not changed by re-creating: use `hermes cron edit` |
 | **Add a skill** | `HERMES-STRUCTURE.md` §1–2 | `skills/<name>/SKILL.md` with a `description` that says when to use it; helper code in `skills/<name>/scripts/`; add to the list in `SOUL.md`; test in `tests/` |
 | **Fill the TBDs (endpoints, PromQL, JQL, hops)** | `README.md` "To fill", `skills/noc-tools/assets/noc.yaml` | only values the owner gives you; never invent queries or hostnames; then `e2e_check.py` (`backend.*`, `config.anomaly_checks`) |
+| **Langfuse (deploy, connect, use)** | `LANGFUSE.md` | `deploy/langfuse/` (Helm values, secrets, install, bootstrap); Hermes plugin from the internal mirror via `LANGFUSE_PLUGIN_SOURCE` |
 | **Monitoring / alerts on the agent** | `README.md` Monitoring, `deploy/monitoring.yaml` | OTLP export in `config.yaml`, PrometheusRule outside Hermes, Langfuse only with `HERMES_LANGFUSE_CAPTURE=sanitized` |
 | **Model endpoint down / 503** | `HERMES-UPDATE-PROMPT.md` "Optional" | defaults `agent.api_max_retries: 3`, `agent.auto_recovery_cycles: 5`; `fallback_providers` only if a second endpoint exists |
 | **Customer data isolation** | `HEALTH-CHECKLIST.md` §7 | customers use DMs; `cron/output`, memory and `session_search` are shared across conversations → team list + rule in `SOUL.md`; verify the model sees who is writing |
@@ -81,5 +82,6 @@ If `code-review/hermes-agent/` is empty: `git submodule update --init --depth 1`
 | `WAKE-AGENT.md` | when cron wakes the model, how to write cron scripts |
 | `HERMES-UPDATE-PROMPT.md` | task: bot explains its own cron messages (standalone, for other projects too) |
 | `MIGRATION-v0.22.5-to-v0.23.3.md` | upgrade path and rollback |
+| `LANGFUSE.md` | Langfuse deploy + Hermes connection, end to end |
 | `HERMES-REFERENCE-v0.22.5.md` | official Hermes docs, 24 pages, grep it |
 | `hermes-agent/` | Hermes source at v0.22.5 (submodule) |

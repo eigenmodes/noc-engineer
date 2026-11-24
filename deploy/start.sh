@@ -11,10 +11,17 @@ for p in SOUL.md config.yaml distribution.yaml skills scripts; do
   cp -r "$SRC/$p" "$HERMES_HOME/$p"
 done
 
-# Langfuse tracing only when its keys are in the Secret. Catalog plugin on new Hermes, bundled one on older.
+# Langfuse tracing only when its keys are in the Secret. The plugin is installed once into HERMES_HOME (PVC).
+# LANGFUSE_PLUGIN_SOURCE: internal mirror of hermes-official-plugins, e.g. https://git.internal/x/hermes-official-plugins.git#langfuse
+# (empty = public catalog, needs internet). The SDK is already in the image, so the dependency step needs no network.
 if [ -n "${HERMES_LANGFUSE_PUBLIC_KEY:-}" ]; then
-  hermes plugins enable langfuse 2>/dev/null || hermes plugins install langfuse --enable 2>/dev/null \
-    || hermes plugins enable observability/langfuse || echo "WARN: Langfuse plugin not enabled"
+  if hermes plugins list 2>/dev/null | grep -qw langfuse; then
+    hermes plugins enable langfuse >/dev/null 2>&1 || true
+  else
+    hermes plugins install "${LANGFUSE_PLUGIN_SOURCE:-langfuse}" --yes-deps --enable \
+      || { hermes plugins install "${LANGFUSE_PLUGIN_SOURCE:-langfuse}" --no-deps && hermes plugins enable langfuse; } \
+      || echo "WARN: Langfuse plugin not installed (see code-review/LANGFUSE.md, troubleshooting)"
+  fi
 fi
 
 python3 - <<'EOF'
