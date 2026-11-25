@@ -125,9 +125,60 @@ model:
 ```
 Cron jobs: `hermes cron edit <id> --provider deepseek-fast`.
 
-### 3.8 Failures
-- `fallback_providers` to a second endpoint (even a smaller model) on 500/502/503.
-- With a fallback, `agent.api_max_retries: 1` so a dead endpoint fails over fast instead of retrying.
+### 3.8 Failures: fallback to a second model
+Official reference: `../HERMES-REFERENCE-v0.22.5.md`, section "Fallback Providers" (v0.22.5 docs).
+
+**When it switches** (after retries are exhausted, unless noted): HTTP 429, **500/502/503**, invalid
+or empty responses repeatedly; 401/403/404 immediately. Hermes keeps the conversation, swaps
+model/provider/client in place and continues the same turn.
+**Turn-scoped:** every new user message starts on the primary again; within one turn it switches at
+most once (if the fallback also fails, normal retries and then an error).
+**Reasoning is re-resolved** for the fallback model: its `agent.reasoning_overrides` entry, else the
+global `agent.reasoning_effort`.
+**Cost of a switch:** the fallback has no prompt cache for the conversation, so the first request
+re-reads the whole history (and again when the primary comes back).
+
+**Configuration (`config.yaml`, top level):**
+```yaml
+fallback_providers:                    # list, tried in order; each entry needs provider AND model
+  - provider: custom                   # any OpenAI-compatible internal endpoint
+    model: <backup-model-id>           # exactly as the endpoint lists it (GET /v1/models)
+    base_url: http://<backup-endpoint>/v1
+    key_env: BACKUP_LLM_KEY            # NAME of the env var holding the key (put the key in the Secret)
+
+agent:
+  api_max_retries: 1                   # with a fallback: fail over fast instead of retrying the dead primary
+  reasoning_overrides:                 # optional: thinking level per model (bare model id matches fallback entries)
+    "<backup-model-id>": low           # e.g. a small backup model without heavy thinking
+```
+Legacy `fallback_model:` (singular) is still read; `fallback_providers` wins when both exist.
+Optional: `fallback.min_switch_reset_seconds` (default 0) skips switching on a rate limit whose
+declared reset is sooner than that.
+
+**Choosing the backup model**
+- **Internal only.** An external provider would send customer data out of the network (`SECURITY.md`).
+- **Must do tool calling.** Without it the backup answers from memory. Test it first: point
+  `model:` at it in a test pod and run `e2e_check.py` (`model.tool_calling`).
+- **Expect lower quality** than DeepSeek V4 with thinking; the goal is an answer instead of silence or
+  an error. Run `evals/run_evals.py` against it once so the team knows what to expect.
+
+**How to add or change it**
+| Where | How | When it takes effect |
+|---|---|---|
+| This repo (recommended) | edit `fallback_providers` in `config.yaml`, add `BACKUP_LLM_KEY` to Secret `hermes-noc-env`, rebuild/redeploy | next pod start (`start.sh` replaces `config.yaml` on every start) |
+| In the pod, interactive | `hermes fallback` (menu) or `hermes fallback add` / `list` / `remove` / `clear` | written to `config.yaml`, **but overwritten by the repo copy on the next restart**: copy the change into git |
+| Change the backup model | change `model:` (and `base_url` if it moved) in the entry; same rollout as above | next start |
+| Disable fallback | remove the list (or `hermes fallback clear`, then commit) | next start |
+
+**Verify after a change**
+1. `kubectl exec deploy/hermes-noc -- hermes fallback list` shows the entry.
+2. In a test pod, make the primary fail (wrong `base_url`), ask a question in chat: the answer comes from
+   the backup and the reply carries the fallback notice; the Langfuse trace shows the backup model.
+3. Restore the primary; the next message goes to the primary again.
+
+Without a second endpoint this section does not apply: Hermes retries the primary 3 times
+(`agent.api_max_retries`), then waits 15/30/60/60/60 s (`agent.auto_recovery_cycles: 5`) with a visible
+countdown, which is the long silence users see when the model is down.
 
 ## 4. Later, only if still slow
 - **Two profiles / deployments:** `sentinel` (cron, no thinking) and `investigator` (chat, thinking)
