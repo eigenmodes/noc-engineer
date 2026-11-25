@@ -51,7 +51,7 @@ scripts/                                  cron scripts (deterministic)
 cron/*.json                               cron job definitions
 deploy/                                   Dockerfile, start.sh, cron_settings.py, e2e_check.py, k8s.yaml, monitoring.yaml,
                                           langfuse/ (Helm values, secrets template, install.sh, bootstrap.py), grafana/ (dashboard JSON)
-evals/                                    run_evals.py + cases.example.yaml (quality gate, see guides/EVALS.md)
+evals/                                    run_evals.py + cases.example.yaml (quality gate, see guides/review/EVALS.md)
 guides/                                   start with START-HERE.md: structure, health, E2E, evals, performance, environment knowledge, runbook,
                                           security, Grafana, Langfuse, wakeAgent, migration, user guide (Hebrew), Hermes reference,
                                           HERMES-REFERENCE-v0.22.5 (official docs), hermes-agent/ (v0.22.5 source, submodule)

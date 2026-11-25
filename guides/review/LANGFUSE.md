@@ -104,7 +104,7 @@ hermes plugins install "https://<git>/<group>/hermes-official-plugins.git#langfu
 ## 6. Using it
 - **Wrong answer:** open its trace; check which query ran, on which window, what came back, then whether
   the model's conclusion follows. Grade with `located_hop`, `root_cause`, `invented_values`.
-- **Cost:** filter by trace name / session; cron jobs should appear only when they found something (`WAKE-AGENT.md`).
+- **Cost:** filter by trace name / session; cron jobs should appear only when they found something (`../WAKE-AGENT.md`).
 - **Before/after a change** to a skill or `SOUL.md`: compare scores and latency on the same questions.
 - **Privacy:** customer data stays in your cluster, 30-day retention, `sanitized` capture. For
   production at volume, `HERMES_LANGFUSE_SAMPLE_RATE=0.2` or capture `metadata` (no content).

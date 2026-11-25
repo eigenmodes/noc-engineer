@@ -73,7 +73,7 @@ DeepSeek V4 template reads `chat_template_kwargs`). If not, define a second name
 thinking and point the cron jobs at it (`--provider`), see 3.7.
 
 ### 3.4 Stop waking the model for nothing
-Cron scripts must print `{"wakeAgent": false}` when there is nothing new (`WAKE-AGENT.md`). A scan
+Cron scripts must print `{"wakeAgent": false}` when there is nothing new (`../WAKE-AGENT.md`). A scan
 every 5 minutes that always wakes a thinking model is a permanent load on the same endpoint your chat
 waits for.
 

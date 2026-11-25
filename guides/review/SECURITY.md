@@ -1,7 +1,7 @@
 # Security and data isolation
 
 What can go wrong with a chat agent that reads production data and answers customers, and what is in
-place. Settings verified in Hermes v0.22.5 (`HERMES-REFERENCE-v0.22.5.md`, "Security").
+place. Settings verified in Hermes v0.22.5 (`../HERMES-REFERENCE-v0.22.5.md`, "Security").
 
 ## Threats and controls
 | # | Threat | Control in this repo | Status / gap |
@@ -13,7 +13,7 @@ place. Settings verified in Hermes v0.22.5 (`HERMES-REFERENCE-v0.22.5.md`, "Secu
 | 5 | A customer learns about other customers or internal findings (DMs) | customers only in DMs (one session per DM) | **gap:** `cron/output`, `data/noc/*`, `MEMORY.md` and `session_search` are shared by all conversations. Needed: team list + `SOUL.md` rule (non-team = customer: only their own servers/tickets, never `cron/output`), and confirm the model sees the sender's identity. Full isolation = separate customer profile/bot without team data |
 | 6 | A customer approves a dangerous command in their own DM | `deny:` list is checked before any approval | residual: commands outside the list can still be approved in chat. Keep the list broad; consider no terminal for customer-facing sessions (separate profile) |
 | 7 | Agent writes wrong things to Jira | `NOC_JIRA_ALLOW_COMMENT=false` by default; comments validated (`investigation.validate`), de-duplicated by marker, logged to `data/noc/audit.jsonl` | in place; enable only after evals pass |
-| 8 | Secrets in git | Secret `hermes-noc-env`, `deploy/langfuse/secret.yaml` and `evals/cases.yaml` git-ignored | in place; `HEALTH-CHECKLIST.md` 8.2 grep |
+| 8 | Secrets in git | Secret `hermes-noc-env`, `deploy/langfuse/secret.yaml` and `evals/cases.yaml` git-ignored | in place; `../HEALTH-CHECKLIST.md` 8.2 grep |
 | 9 | Customer data in traces | Langfuse self-hosted, `HERMES_LANGFUSE_CAPTURE=sanitized` (secret redaction + truncation), 30-day retention, sign-up disabled | in place; `metadata` capture if content must not be stored |
 | 10 | Data leaves the network | internal model endpoint, internal Langfuse, telemetry off | **verify** egress policy of the pod (NetworkPolicy: only model, Mattermost, backends, Langfuse, OTel collector) |
 | 11 | Bot token / API key leak | tokens only in the Secret, never printed (`e2e_check.py` prints no secrets) | rotate on staff change (below) |

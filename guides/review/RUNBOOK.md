@@ -27,7 +27,7 @@ Pausing keeps the job and its history; never delete `$HERMES_HOME/cron/`.
 | Symptom | Likely cause | Action |
 |---|---|---|
 | Channel flooded with the same finding | cooldown too short, flapping metric, or state lost (PVC) | pause `anomaly-scan`; check `data/noc/anomaly_state.json`; raise `cooldown_minutes` or `min_baseline` |
-| Same backend error every few minutes | error gate state lost or error text not stable | pause the job; see `WAKE-AGENT.md`; fix the backend |
+| Same backend error every few minutes | error gate state lost or error text not stable | pause the job; see `../WAKE-AGENT.md`; fix the backend |
 | No messages at all | gateway down, Mattermost disconnected, bot not in channel, jobs paused | `e2e_check.py` (`mattermost.*`, `cron.jobs`) |
 | Messages stop after a restart | jobs recreated paused or deleted | `hermes cron list`; `cron.jobs` check; `start.sh` log |
 | Answers from memory, no numbers | tool calling broken or terminal toolset off | `e2e_check.py model.tool_calling`; Langfuse trace has no tool spans |
@@ -36,13 +36,13 @@ Pausing keeps the job and its history; never delete `$HERMES_HOME/cron/`.
 | "Model unavailable" / long retries | endpoint down or overloaded (503) | model team; dashboard model row; `fallback_providers` if a second endpoint exists |
 | Very slow answers | model latency, many tool round-trips, huge context | dashboard; Langfuse latency per span; `/new` in the channel if the conversation is huge |
 | Pod restarts | OOM, crash at start | `kubectl describe pod`, memory panel, `start.sh` output |
-| `state.db` large / disk full | quiet cron runs waking the model | `WAKE-AGENT.md`; PVC size |
+| `state.db` large / disk full | quiet cron runs waking the model | `../WAKE-AGENT.md`; PVC size |
 
 ## Rollback
 | What changed | Roll back |
 |---|---|
 | Skill, SOUL, config, scripts (git) | `git revert <commit>`, rebuild image, `kubectl set image ...` (start.sh re-syncs files) |
-| Image / Hermes version | `kubectl set image deploy/hermes-noc hermes=<previous tag>`; after a Hermes upgrade only with a PVC restore (`MIGRATION-*.md`) |
+| Image / Hermes version | `kubectl set image deploy/hermes-noc hermes=<previous tag>`; after a Hermes upgrade only with a PVC restore (`../MIGRATION-*.md`) |
 | A job's settings | `hermes cron edit <id> ...` or `cron_settings.py` |
 
 ## After an incident

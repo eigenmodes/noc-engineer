@@ -20,7 +20,7 @@ if [ -n "${HERMES_LANGFUSE_PUBLIC_KEY:-}" ]; then
   else
     hermes plugins install "${LANGFUSE_PLUGIN_SOURCE:-langfuse}" --yes-deps --enable \
       || { hermes plugins install "${LANGFUSE_PLUGIN_SOURCE:-langfuse}" --no-deps && hermes plugins enable langfuse; } \
-      || echo "WARN: Langfuse plugin not installed (see guides/LANGFUSE.md, troubleshooting)"
+      || echo "WARN: Langfuse plugin not installed (see guides/review/LANGFUSE.md, troubleshooting)"
   fi
 fi
 

@@ -26,7 +26,7 @@ monitoring:
 
 # Read-only in practice, not only in SOUL.md. Dangerous commands need a human in chat (manual);
 # cron and one-shot runs deny them. `deny` blocks these always (fnmatch, case-insensitive, checked first).
-# Keys verified in Hermes v0.22.5 (guides/HERMES-REFERENCE-v0.22.5.md, "Security"). See guides/SECURITY.md.
+# Keys verified in Hermes v0.22.5 (guides/HERMES-REFERENCE-v0.22.5.md, "Security"). See guides/review/SECURITY.md.
 approvals:
   mode: manual
   cron_mode: deny
