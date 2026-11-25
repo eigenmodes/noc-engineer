@@ -22,7 +22,7 @@ Langfuse link in dashboard settings.
 | Agent | gateway up, Mattermost up/degraded with error code, busy, active agents, restart requested, state | Hermes OTLP |
 | Cron | heartbeat age, last success age, overdue, store writable, enabled/running jobs, skipped runs, catch-up | Hermes OTLP |
 | Pod | restarts, memory, CPU of container `hermes` | kube-state-metrics, cAdvisor (if scraped) |
-| Model endpoint | requests running/waiting, tokens/s, latency p50/p95 | vLLM `/metrics` (only if Kimi is served by vLLM and scraped) |
+| Model endpoint | requests running/waiting, tokens/s, latency p50/p95 | vLLM `/metrics` (only if DeepSeek V4 is served by vLLM and scraped) |
 
 Not in Prometheus: per-turn detail and token cost per job (Langfuse), cron run spans
 (`hermes.cron_execution`, a trace backend such as Tempo if the collector forwards traces).

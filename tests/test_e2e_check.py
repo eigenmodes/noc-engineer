@@ -25,7 +25,7 @@ def last():
     return e.RESULTS[-1]
 
 
-CFG = {"model": {"default": "kimi-k3", "base_url": "http://llm/v1"}, "group_sessions_per_user": False,
+CFG = {"model": {"default": "deepseek-v4", "base_url": "http://llm/v1"}, "group_sessions_per_user": False,
        "cron": {"mirror_delivery": True}}
 
 
@@ -42,7 +42,7 @@ def test_tool_calling_pass_and_fail(ctx, fake):
 def test_model_not_served(ctx, fake):
     fake({"/models": lambda *a: {"data": [{"id": "other"}]}})
     e.c_model_up(CFG)
-    assert last()["status"] == "FAIL" and "kimi-k3" in last()["detail"]
+    assert last()["status"] == "FAIL" and "deepseek-v4" in last()["detail"]
 
 
 def test_sessions_defaults_fail(ctx, monkeypatch):

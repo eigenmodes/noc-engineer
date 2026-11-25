@@ -20,7 +20,7 @@ Hermes pod ── langfuse plugin (hooks: turns, model requests, tool calls) ─
 | `deploy/langfuse/secret.example.yaml` | two Secrets: `langfuse` (app + datastores) and `langfuse-init` (org, project, API keys, first user) |
 | `deploy/langfuse/values.yaml` | Helm values: secrets by reference, telemetry off, sign-up off, ingress, headless init on the web pod |
 | `deploy/langfuse/install.sh` | prerequisites (cert-manager, ClickHouse operator) + `helm upgrade --install` |
-| `deploy/langfuse/bootstrap.py` | idempotent project setup: model price for Kimi + 6 score configs |
+| `deploy/langfuse/bootstrap.py` | idempotent project setup: model price for DeepSeek V4 + 6 score configs |
 | `deploy/Dockerfile`, `deploy/start.sh`, `deploy/k8s.yaml` | Hermes side: SDK in Hermes' Python, plugin install from an internal mirror, env |
 | `deploy/e2e_check.py` | check `langfuse.tracing`: reachable, keys valid, plugin installed |
 
@@ -59,7 +59,7 @@ Check: open the URL, log in with the init user, project `noc-engineer` exists.
 ## 3. Project setup (models + scores)
 ```sh
 LANGFUSE_URL=https://langfuse.<domain> LANGFUSE_PUBLIC_KEY=pk-lf-... LANGFUSE_SECRET_KEY=sk-lf-... \
-  python3 deploy/langfuse/bootstrap.py --model kimi-k3 --input-price 0 --output-price 0
+  python3 deploy/langfuse/bootstrap.py --model deepseek-v4 --input-price 0 --output-price 0
 ```
 - `--model` = `model.default` in `config.yaml`, exactly as Hermes sends it. Prices are USD per token;
   0 counts tokens without cost. Set an internal cost (e.g. GPU cost / throughput) to see money per job.

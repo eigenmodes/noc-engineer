@@ -36,11 +36,11 @@ def test_bootstrap_is_idempotent(monkeypatch, capsys):
     monkeypatch.setattr(bootstrap.urllib.request, "urlopen", urlopen)
     for k, v in {"LANGFUSE_URL": "http://lf", "LANGFUSE_PUBLIC_KEY": "pk", "LANGFUSE_SECRET_KEY": "sk"}.items():
         monkeypatch.setenv(k, v)
-    assert bootstrap.main(["--model", "kimi-k3"]) == 0
+    assert bootstrap.main(["--model", "deepseek-v4"]) == 0
     names = [b.get("name") or b.get("modelName") for _, b in posts]
-    assert "kimi-k3" in names and "located_hop" not in names and "invented_values" in names
+    assert "deepseek-v4" in names and "located_hop" not in names and "invented_values" in names
     model = next(b for p, b in posts if "models" in p)
-    assert model["matchPattern"] == "(?i)^kimi-k3$" and model["unit"] == "TOKENS"
+    assert model["matchPattern"] == "(?i)^deepseek-v4$" and model["unit"] == "TOKENS"
     posts.clear()
-    assert bootstrap.main(["--model", "kimi-k3"]) == 0       # second run: nothing new
+    assert bootstrap.main(["--model", "deepseek-v4"]) == 0       # second run: nothing new
     assert posts == []

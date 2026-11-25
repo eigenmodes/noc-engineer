@@ -1,7 +1,7 @@
 model:
   provider: custom
-  default: kimi-k3                              # TBD: exact model id served by the endpoint
-  base_url: "https://REPLACE-kimi-endpoint/v1"  # TBD
+  default: deepseek-v4                          # TBD: exact model id served by the endpoint (GET /v1/models)
+  base_url: "https://REPLACE-deepseek-endpoint/v1"  # TBD
 
 # One shared conversation per channel (not per user), so everyone who tags the bot
 # sees the same context, and delivered cron messages can attach to the channel session.

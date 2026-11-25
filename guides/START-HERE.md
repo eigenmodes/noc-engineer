@@ -8,7 +8,7 @@ Read this file first. It says what to read, in what order, and what to do for ea
 - Five jobs: anomaly scan every 5 min (now vs same time last week), 09:00 daily summary, questions in
   Mattermost (team channel and customer DMs), new Grafana alerts, customer Jira tickets.
 - Runs as one pod on Kubernetes (`deploy/`), chat = Mattermost, model = an internal OpenAI-compatible
-  endpoint (Kimi K3).
+  endpoint (DeepSeek V4).
 - The repo root is the profile: `SOUL.md`, `config.yaml`, `distribution.yaml`, `skills/`, `scripts/`,
   `cron/`. `deploy/`, `tests/` and `guides/` are not installed into the agent.
 

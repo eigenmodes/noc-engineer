@@ -883,7 +883,7 @@
     {
       "id": 20,
       "type": "row",
-      "title": "Model endpoint (only if Kimi is served by vLLM; set $vllm_job)",
+      "title": "Model endpoint (only if DeepSeek V4 is served by vLLM; set $vllm_job)",
       "collapsed": false,
       "gridPos": {
         "x": 0,

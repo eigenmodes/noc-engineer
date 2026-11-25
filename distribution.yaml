@@ -4,7 +4,7 @@ hermes_requires: ">=0.22.5"   # attach_to_session, cron mirror, jobs.json merge 
 description: NOC agent - anomaly scan, daily summary, Mattermost questions, Grafana alerts, customer Jira tickets
 author: Eigenmodes
 env_requires:
-  - {name: OPENAI_API_KEY, description: "Key for the Kimi K3 endpoint in config.yaml", required: true}
+  - {name: OPENAI_API_KEY, description: "Key for the internal DeepSeek V4 endpoint in config.yaml", required: true}
   - {name: MATTERMOST_URL, description: "Mattermost server URL", required: true}
   - {name: MATTERMOST_TOKEN, description: "Bot account token", required: true}
   - {name: MATTERMOST_ALLOWED_USERS, description: "User IDs (26 chars, comma-separated) allowed to talk to the agent", required: true}

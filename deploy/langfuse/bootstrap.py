@@ -2,7 +2,7 @@
 """Configure the Langfuse project for the NOC agent. Idempotent: creates only what is missing.
 
   LANGFUSE_URL=https://langfuse.internal LANGFUSE_PUBLIC_KEY=pk-lf-... LANGFUSE_SECRET_KEY=sk-lf-... \
-  python3 bootstrap.py [--model kimi-k3] [--input-price 0] [--output-price 0] [--dry-run]
+  python3 bootstrap.py [--model deepseek-v4] [--input-price 0] [--output-price 0] [--dry-run]
 
 Creates (Langfuse public API, Basic auth with the project keys):
   1. a model definition, so token usage of the internal model is priced (USD per token; 0 = count only)
@@ -62,7 +62,7 @@ class Api:
 
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--model", default=os.environ.get("NOC_MODEL", "kimi-k3"),
+    ap.add_argument("--model", default=os.environ.get("NOC_MODEL", "deepseek-v4"),
                     help="model id exactly as Hermes sends it (config.yaml model.default)")
     ap.add_argument("--input-price", type=float, default=0.0, help="USD per input token (0 = count only)")
     ap.add_argument("--output-price", type=float, default=0.0, help="USD per output token")
