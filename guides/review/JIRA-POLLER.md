@@ -118,22 +118,31 @@ post only the public reply on the ticket and send the technical part to the team
 
 ### 4.6 Routing to the owning team (department board)
 The department has a board/portal where tasks and bugs are assigned to a team. For `NEEDS_ACTION` the
-agent routes the work there instead of only commenting. Which mechanism depends on the portal (**TBD**):
-| Portal is | Routing mechanism | Config |
-|---|---|---|
-| a Jira board in the **same** Jira | set the team field on the customer ticket (custom field / component / assignee group) **or** create a linked issue in the department project | `routing.mode: field` or `linked_issue` |
-| a Jira board in **another** project | create an issue in the department project, link it to the customer ticket ("is caused by" / "relates to", **verify** link names) | `routing.mode: linked_issue` |
-| a non-Jira portal | its REST API through a new `noc.py` command (same gating/audit pattern), or, until then, a channel message tagging the team | `routing.mode: notify` |
+agent routes the work there instead of only commenting. Decided by the owner: the board is Jira and the team is a **custom field** on the department issue.
+So the mechanism is: **create a Bug/Task in the department project with the team custom field set, and
+link it to the customer ticket** (`routing.mode: linked_issue`).
+
+**Reference implementation:** the owner already has code that creates Jira issues (path **TBD**,
+the owner provides it). Read it first and reuse, do not re-invent:
+- authentication and base URL handling (must match `noclib`'s `jira` section: basic with user+token, or PAT bearer);
+- the exact `POST /rest/api/2/issue` payload: project key, issue type, summary/description format,
+  **the team custom field id and its value format** (select list `{"value": "<team>"}`, option id
+  `{"id": "<id>"}`, cascading, or user/group picker; copy whatever the working code sends);
+- any other required fields the project's create screen enforces (components, priority, labels).
+Port it into `noclib.jira_create_issue(...)` + `noclib.jira_link(...)` (no second HTTP client, no new
+dependency), behind the gating below. If the reference code differs from this guide, the reference code
+wins for Jira payload details; this guide wins for gating, de-duplication and audit.
 
 Who owns what is data, not model judgement: a map from the located hop (and optionally the symptom)
 to a team, in `noc.yaml`:
 ```yaml
 routing:
-  mode: TBD                         # field | linked_issue | notify
+  mode: linked_issue                # decided: department issue with team custom field, linked to the ticket
   allow: ${NOC_JIRA_ALLOW_ROUTE:-false}
   project: TBD                      # department project key (linked_issue)
   issue_type: TBD                   # Bug / Task
-  team_field: TBD                   # e.g. customfield_12345 or "components" (field mode)
+  team_field: TBD                   # custom field id from the reference code, e.g. customfield_12345
+  team_value_format: TBD            # value | id | name  (how the reference code sends the team)
   link_type: TBD                    # e.g. "Relates" (verify exact name)
   teams:                            # hop id -> team value as the board expects it
     rules: TBD                      # e.g. "Rules & Config"
