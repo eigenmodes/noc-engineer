@@ -50,7 +50,9 @@ If `guides/hermes-agent/` is empty: `git submodule update --init --depth 1`.
 | **Explain the bot to users** | `review/USER-GUIDE.md` (Hebrew) | how to ask, what it sends, how to read status |
 | **Check if the system is OK** | `E2E-CHECKS.md`, `HEALTH-CHECKLIST.md` | in the pod: `python3 /opt/noc-engineer/e2e_check.py`; then the manual scenarios; report every FAIL with its fix, fix nothing without approval |
 | **Bot does not understand its own cron message** | `HERMES-UPDATE-PROMPT.md` | the reliable path is the `## Your own messages` section in `skills/customer-question/SKILL.md` (reads `cron/output`); the mirror (`cron.mirror_delivery`, `group_sessions_per_user: false`) is best effort on Mattermost v0.22.5 |
-| **Answer quality of experience (format, tone, templates)** | `review/UX.en.md` | templates 3.1–3.5 into SOUL.md and skills; display settings |
+| **Customer Jira tickets (investigate, comment, close)** | `review/JIRA-POLLER.md` | outcome classes, jira-transition gated in code, shadow → comment → close rollout |
+| **Answer quality of experience (format, tone, templates)** | `review/JIRA-POLLER.md` | customer tickets end to end: poller, outcomes, comment split, safe closing |
+| `review/UX.en.md` | templates 3.1–3.5 into SOUL.md and skills; display settings |
 | **Slow answers (thinking on, busy endpoint)** | `review/PERFORMANCE.md` | cut model rounds first (`noc.py investigate`), thinking only for chat, wakeAgent, endpoint asks |
 | **Too many model calls / cost / state.db grows** | `WAKE-AGENT.md` | every quiet path of a cron script must print `{"wakeAgent": false}` as the last line; empty stdout wakes the model |
 | **Add or change a cron job** | `WAKE-AGENT.md`, `HERMES-STRUCTURE.md` §3.3 | edit `cron/<name>.json` + script in `scripts/`; `attach_to_session` has no CLI flag → `deploy/cron_settings.py`; existing jobs are not changed by re-creating: use `hermes cron edit` |
