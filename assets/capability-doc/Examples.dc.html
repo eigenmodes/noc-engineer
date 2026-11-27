@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>Rafiki — ככה זה נראה בפועל</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700;800&amp;family=Nunito:wght@800;900&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#b8400b}a:hover{color:#8a2f08}
+</style>
+</helmet>
+<div dir="rtl" style="width: 1240px; height: 1880px; box-sizing: border-box; background: #0a0705; font-family: Heebo, sans-serif; color: #f6ebdd; display: flex; flex-direction: column; align-items: center; padding: 56px 80px 48px; gap: 36px">
+
+<div style="width: 1080px; display: flex; align-items: center; justify-content: space-between; gap: 24px">
+<div style="display: flex; flex-direction: column; gap: 10px">
+<h1 style="margin: 0; font-size: 56px; font-weight: 800; line-height: 1.1">ככה זה נראה בפועל</h1>
+<div style="font-size: 22px; line-height: 1.5; color: #cdb9a4">דוגמאות אמיתיות מהעבודה היומיומית של Rafiki</div>
+</div>
+<div dir="ltr" style="display: flex; align-items: center; gap: 14px; flex-shrink: 0">
+<img src="/_blob/e1d85101f959e40b2d4dadb1aba76e09" alt="לוגו Rafiki" style="width: 76px; height: 76px; border-radius: 18px; object-fit: cover; display: block; box-shadow: 0 0 0 3px {{accent}}">
+<div style="font-family: Nunito, sans-serif; font-size: 44px; font-weight: 900; line-height: 1">Raf<span style="color: {{accent}}">iki</span></div>
+</div>
+</div>
+
+<div style="width: 1080px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px">
+<sc-for list="{{slots}}" as="slot" hint-placeholder-count="4">
+<div style="display: flex; flex-direction: column; background: #21150d; border: 1px solid #4a2a14; border-radius: 16px; overflow: hidden">
+<div dir="ltr" style="display: flex; align-items: center; gap: 8px; height: 40px; padding: 0 14px; background: #2c1c11; border-bottom: 1px solid #4a2a14">
+<span style="width: 11px; height: 11px; border-radius: 6px; background: #e0402a"></span>
+<span style="width: 11px; height: 11px; border-radius: 6px; background: #ffb020"></span>
+<span style="width: 11px; height: 11px; border-radius: 6px; background: #5a4434"></span>
+<span style="margin-left: 10px; font-size: 15px; color: #cdb9a4">{{slot.where}}</span>
+</div>
+<div style="height: 560px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; background: #160e09; color: #8f7863; font-size: 20px; font-weight: 500">
+<svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#8f7863" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"></rect><circle cx="9" cy="10" r="1.6"></circle><path d="M21 16l-5-5-9 8"></path></svg>
+[צילום מסך: {{slot.shot}}]
+</div>
+<div style="display: flex; flex-direction: column; gap: 8px; padding: 18px 22px 20px">
+<div style="display: flex; align-items: center; gap: 10px">
+<span style="width: 30px; height: 30px; border-radius: 15px; background: {{accent}}; color: #140c07; display: flex; align-items: center; justify-content: center; font-size: 17px; font-weight: 800">{{slot.num}}</span>
+<span style="font-size: 22px; font-weight: 800">{{slot.role}}</span>
+</div>
+<div style="font-size: 18px; line-height: 1.5; color: #ddcbb8">{{slot.caption}}</div>
+</div>
+</div>
+</sc-for>
+</div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"accent":{"editor":"color","default":"#ff7a1a","options":["#ff7a1a","#ffb020","#e0402a"]},"$preview":{"width":1240,"height":1880}}'>
+class Component extends DCLogic {
+renderVals() {
+const caption = '[מה Rafiki מצא, במשפט אחד]';
+return {
+accent: this.props.accent ?? '#ff7a1a',
+slots: [
+{ num: '1', role: 'שירות לקוחות', where: 'Mattermost · הודעה פרטית', shot: 'שאלה של לקוח ותשובת הבוט', caption },
+{ num: '2', role: 'ניטור אנומליות', where: 'Mattermost · ערוץ הצוות', shot: 'התראת אנומליה', caption },
+{ num: '3', role: 'דוחות ותובנות', where: 'Mattermost · ערוץ הצוות', shot: 'סיכום התקלות היומי', caption },
+{ num: '4', role: 'טיפול בתקלות', where: 'Jira', shot: 'קריאה עם ממצאי הבוט', caption }
+]
+};
+}
+}
+</script>
+</body>
+</html>
