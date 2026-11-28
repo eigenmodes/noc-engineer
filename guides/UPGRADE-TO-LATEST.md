@@ -45,6 +45,24 @@ Files used here:
 3. Read the release notes of every tag between the old and the new version (GitHub releases page). Note
    breaking changes, Mattermost changes, cron changes and state.db changes.
 
+### 2.1 New options v0.22.5 → v0.23.5 already reviewed (propose to the owner, apply only after OK)
+Verified in `hermes_cli/config_defaults.py` and the Mattermost adapter of v0.23.5. None of these keys exist in v0.22.5,
+so add them to `settings-lock.yaml` only after the upgrade.
+
+| Key | Default | Proposal | Why |
+|---|---|---|---|
+| `approvals.approvers` | `["*"]` = any admitted member | list of team-lead Mattermost user IDs, or `[]` (requester + admins) | Today any allowed user, customers included, may answer an approval or clarify prompt |
+| `skills.index_desc_limit` | `60` chars (range 60..1024) | `200` | Skill descriptions are cut to 60 chars in the index, so the model picks skills worse. Costs a few tokens per turn |
+| `compression.prepare_ahead` | `false` | `true` (test under load) | The shared channel session grows. The next summary is written in the background, so there is no compaction pause on a user's turn. It adds one background LLM call |
+| `agent.clarify_timeout` | was 3600, now **90** s | keep 90, or 300 for customer DMs | A behavior change: an unanswered clarify question now expires after 90 s. A new message from the user cancels it |
+| `MATTERMOST_BOT_USERS` (env) / `bot_users` | empty | user IDs of other bots that post in our channels | Marks them as bots, so `gateway.bot_loop_guard` (on by default, `max_hops: 4`) stops bot-to-bot loops |
+| `delegation.auto_resume` | `false` | keep `false` | It resumes child tasks unattended and spends tokens |
+| `runtime.malloc_arena_max` | `4` | keep | Lower gateway RAM, already on by default |
+| `security.redact_phone_numbers` | `true` | keep | Phone numbers are redacted |
+
+Not relevant to us: `webapp.*`, `hosted_rooms.*`, `auxiliary.group_router.*`, `voice.*`, `telegram.*`, `browser.*`,
+`vault.*`, `worktrees.*`, `prompt_caching.*` (the vLLM prefix cache works server-side).
+
 ## 3. Upgrade (test namespace first)
 1. Pin the image to the exact tag (`nousresearch/hermes-agent:vX.Y.Z`). Confirm the tag exists in the registry.
    Never use `latest` or `stable` in production.
