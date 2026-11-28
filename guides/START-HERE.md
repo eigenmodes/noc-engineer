@@ -42,6 +42,8 @@ If `guides/hermes-agent/` is empty: `git submodule update --init --depth 1`.
 ## 4. What to do, by task
 | Task | Read | Do |
 |---|---|---|
+| **Sessions mix? Stable under many users?** | `SESSION-ISOLATION-AND-LOAD.md` | apply the 4 settings, ask the 3 owner decisions, run tests I-1..I-5 and L-1..L-4 |
+| **Upgrade Hermes, keep all settings** | `UPGRADE-TO-LATEST.md` | `deploy/upgrade_settings.py snapshot/check/apply`, `diff-defaults` old vs new, `hermes config check/migrate`, test namespace first |
 | **Make it production-ready (isolation, load, stability)** | `PRODUCTION-READINESS.md` | P0 first: prove no cross-session leakage and stability under load with tests I-1..I-5, L-1..L-4; then P1–P8; record everything in `PRODUCTION-STATUS.md` |
 | **Is the agent right? (quality)** | `review/EVALS.md` | `evals/run_evals.py` on 20 known incidents, grade traces in Langfuse, fix by failure type |
 | **Teach it the network (fill TBDs)** | `review/ENVIRONMENT-KNOWLEDGE.md` | hop table, anomaly checks, failure patterns, change sources, customer mapping, glossary; only values the team gives |

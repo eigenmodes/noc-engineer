@@ -1,0 +1,121 @@
+# Settings we own. They must survive every Hermes upgrade.
+# Checked and applied by deploy/upgrade_settings.py. Keys verified to exist in Hermes v0.22.5 AND v0.23.5.
+#
+# status:
+#   required        - must hold; `apply` sets it
+#   recommended     - should hold; `apply --recommended` sets it
+#   owner_decision  - never applied automatically; only reported
+# kind: config (config.yaml dotted key) | env (environment variable; value never printed)
+# check: equals (default) | nonempty | present
+
+settings:
+  # ---- sessions -------------------------------------------------------------
+  - key: group_sessions_per_user
+    value: false
+    status: required
+    why: One shared conversation per channel, by design. Gateway-level key (not in DEFAULT_CONFIG).
+
+  - key: display.busy_input_mode
+    value: queue
+    status: recommended
+    why: Default 'interrupt' lets a second message in the same session redirect the running answer.
+
+  - key: cron.max_parallel_jobs
+    value: 1
+    status: recommended
+    why: Cron jobs must not compete with people for the overloaded LLM. Default unbounded.
+
+  - key: cron.mirror_delivery
+    value: true
+    status: required
+    why: Cron deliveries to the home channel join the channel conversation (best effort on Mattermost).
+
+  - key: memory.memory_enabled
+    value: false
+    status: owner_decision
+    why: Persistent memory is shared by ALL sessions of the profile. Off on any profile customers reach.
+
+  - key: MATTERMOST_REPLY_MODE
+    kind: env
+    value: thread
+    status: owner_decision
+    why: Separate session per channel request. Changes the shared channel context the owner keeps today.
+
+  # ---- safety ---------------------------------------------------------------
+  - key: approvals.mode
+    value: manual
+    status: required
+    why: Dangerous commands need a human in chat. Default is 'smart'.
+  - key: approvals.cron_mode
+    value: deny
+    status: required
+    why: Cron never runs dangerous commands.
+  - key: approvals.single_query_mode
+    value: deny
+    status: required
+    why: One-shot runs never run dangerous commands.
+  - key: approvals.unattended_mode
+    value: deny
+    status: required
+    why: No human present means deny.
+  - key: approvals.deny
+    check: nonempty
+    status: required
+    why: Deny list of mutating commands (kubectl/oc/helm/argocd/psql/ssh/curl writes). Kept in config.yaml.
+
+  # ---- monitoring -----------------------------------------------------------
+  - key: monitoring.gateway_health_export.enabled
+    value: true
+    status: required
+    why: hermes_gateway_up / platform_up / cron heartbeat metrics for alerts.
+  - key: monitoring.export.otlp.enabled
+    value: true
+    status: required
+    why: Ships the health metrics to the OTel collector.
+  - key: monitoring.export.otlp.endpoint
+    check: nonempty
+    status: required
+    why: Collector URL (environment-specific).
+
+  # ---- Mattermost display (guides/review/PERFORMANCE.md 3.6) ----------------
+  - key: streaming.enabled
+    value: true
+    status: recommended
+    why: Text appears as it is written (Mattermost supports edits).
+  - key: display.platforms.mattermost.tool_progress
+    value: "off"
+    status: recommended
+    why: No tool bubbles with script paths.
+  - key: display.platforms.mattermost.interim_assistant_messages
+    value: false
+    status: recommended
+    why: No mid-turn chatter.
+  - key: display.platforms.mattermost.long_running_notifications
+    value: true
+    status: recommended
+    why: One "working on it" message during long silences.
+
+  # ---- model ----------------------------------------------------------------
+  - key: model.provider
+    value: custom
+    status: required
+    why: Internal OpenAI-compatible endpoint.
+  - key: model.default
+    check: nonempty
+    status: required
+    why: DeepSeek V4 model id served by the endpoint.
+  - key: model.base_url
+    check: nonempty
+    status: required
+    why: Internal endpoint URL.
+  - key: fallback_providers
+    check: nonempty
+    status: recommended
+    why: Second endpoint for 429/5xx (guides/review/PERFORMANCE.md 3.8).
+
+  # ---- environment (presence only) -----------------------------------------
+  - {key: OPENAI_API_KEY, kind: env, check: present, status: required, why: Model endpoint key}
+  - {key: MATTERMOST_URL, kind: env, check: present, status: required, why: Mattermost server}
+  - {key: MATTERMOST_TOKEN, kind: env, check: present, status: required, why: Bot token}
+  - {key: MATTERMOST_ALLOWED_USERS, kind: env, check: present, status: required, why: Only listed users may talk to the bot}
+  - {key: MATTERMOST_HOME_CHANNEL, kind: env, check: present, status: required, why: Cron output channel}
