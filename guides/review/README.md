@@ -34,4 +34,4 @@
 - איך DeepSeek V4 אצלכם מגיב ל-`reasoning_effort`.
 - פריסה של Langfuse ב-OpenShift.
 
-- `INVESTIGATION-ORCHESTRATION.md` — מדריך אחד ל-LLM: תור חקירות ב-Postgres, worker, בידוד, התראות. לבדוק: §3 (החלטות), §13 (שינויי קונפיג שדורשים אישור), §14 (שאלות אליך).
+- `INVESTIGATION-ORCHESTRATION.md` — לעתיד בלבד, לא לביצוע עכשיו: תור חקירות ב-Postgres ו-worker. המשימה הנוכחית: `guides/PRODUCTION-READINESS.md`.
